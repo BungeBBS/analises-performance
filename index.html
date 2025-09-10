@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Análises de Performance - Bunge</title>
+    
+    <!-- Link para o Font Awesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bunge-blue: #002d5d;
+            --bunge-green: #0CBC8C;
+            --bg-page: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-dark: #343a40;
+            --text-light: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .portal-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            padding: 50px 40px;
+            border-top: 5px solid var(--bunge-blue);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            max-width: 150px;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--bunge-blue);
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-light);
+            margin-bottom: 40px;
+        }
+        
+        .card-analise {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card-analise h2 {
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        
+        .card-analise p {
+            font-size: 15px;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--bunge-green);
+            color: white;
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(12, 188, 140, 0.3);
+        }
+
+        .cta-button:hover {
+            background-color: #0da497;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(12, 188, 140, 0.4);
+        }
+
+        .cta-button i {
+            margin-right: 10px;
+        }
+
+        footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: var(--text-light);
+            border-top: 1px solid #e9ecef;
+            padding-top: 20px;
+        }
+
+        footer strong {
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="portal-container">
+        <header>
+            <img src="https://cdn.worldvectorlogo.com/logos/bunge-limited-logo.svg" alt="Bunge Logo" class="logo">
+            <h1>Portal de Análises de Performance</h1>
+            <p class="subtitle">Projetos e Dashboards de Otimização para Industrial Operations</p>
+        </header>
+
+        <main>
+            <div class="card-analise">
+                <h2>Diagnóstico de Performance: Cargo Flow</h2>
+                <p>Análise completa de performance, identificação de gargalos, consumo de capacidade e plano de ação estratégico para a otimização do relatório Cargo Flow.</p>
+                
+                <!-- ESTE É O BOTÃO DE AÇÃO PRINCIPAL -->
+                <a href="Dashboard de Diagnóstico e Otimização VFinal.html" class="cta-button">
+                    <i class="fas fa-chart-line"></i> Acessar Diagnóstico
+                </a>
+            </div>
+        </main>
+
+        <footer>
+            <p>Desenvolvido por <strong>Willian Oliveira</strong> | Analista de Dados Senior</p>
+        </footer>
+    </div>
+
+</body>
+</html>
