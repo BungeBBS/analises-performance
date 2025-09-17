@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<!-- saved from url=(0271)http://127.0.0.1:3000/c:/Users/c2535837/BUNGE/Bases%20Power%20BI%20-%20Documentos/42%20-%20Otimiza%C3%A7%C3%A3o%20de%20Projetos%20PBI/Cargo%20Flow/Diagn%C3%B3stico%20Estrat%C3%A9gico%20de%20Performance%20%E2%80%94%20Cargo%20Flow%20(V25%20-%20Vers%C3%A3o%20Integrada).html -->
+<html lang="pt-BR"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Estratégico de Performance — Cargo Flow (V25 - Versão Integrada)</title>
+    
+    <!-- Scripts e Estilos de CDNs Públicas e Confiáveis -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+   
+    <style>
+/* ======================================================= */
+/* PASSO 1: ANIMAÇÃO GIROFLEX (COLE NO SEU <style>)         */
+/* ======================================================= */
+
+/* A "receita" da animação do pisca-pisca */
+@keyframes giroflex-animation {
+    0%, 100% {
+        background-color: #dc3545; /* Vermelho Crítico */
+        box-shadow: 0 0 12px #ff4d4d;
+        color: white;
+    }
+    50% {
+        background-color: #0056b3; /* Azul Escuro Policial */
+        box-shadow: 0 0 12px #3399ff;
+        color: white;
+    }
+}
+
+/* O estilo que aplica a animação ao item de menu */
+.problem-section-highlight {
+    animation: giroflex-animation 1s infinite linear;
+    border-radius: 50px; /* Formato de pílula para máximo destaque */
+    
+    /* Ajustes finos para não quebrar o layout */
+    margin-left: 5px;
+    margin-right: 5px;
+    border-bottom: 3px solid transparent !important; /* Garante que a borda de "ativo" não apareça */
+}
+
+/* Garante que o texto fique branco mesmo quando a aba está ativa */
+.problem-section-highlight.active {
+    color: white !important;
+}
+
+/* ======================================================= */
+/* PASSO 2: ESTILO DA TARJA (COLE NO SEU <style>)          */
+/* ======================================================= */
+
+#critical-alert-banner {
+  position: fixed;
+  /* Coloca a tarja abaixo do seu cabeçalho fixo */
+  top: 130px; 
+  left: 50%;
+  
+  /* Animação de entrada e saída */
+  transform: translate(-50%, -20px);
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+  
+  /* Estilo visual */
+  background-color: var(--status-red);
+  color: white;
+  padding: 12px 25px;
+  border-radius: 50px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  z-index: 1050; /* Garante que fique por cima de tudo */
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  
+  /* Começa "não-clicável" */
+  pointer-events: none; 
+}
+
+/* Classe que vamos usar no JavaScript para mostrar a tarja */
+#critical-alert-banner.visible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto; /* Torna-se "clicável" quando visível */
+}
+
+/* ======================================================= */
+
+
+
+/* ======================================================= */
+/* PASSO 3: NOVO CSS DA INTRODUÇÃO (COLE NO SEU <style>)    */
+/* ======================================================= */
+
+#splash-screen {
+    /* Layout */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    
+    /* Fundo com o gradiente do seu cabeçalho! */
+    background-image: linear-gradient(to bottom right, #1E536C, #0A2840);
+    
+    /* Animação de saída */
+    opacity: 1;
+    transition: opacity 0.8s ease-out;
+    pointer-events: none; /* Permite cliques "através" dele depois de sumir */
+}
+
+.splash-content {
+    color: white;
+    animation: fadeInScaleUp 1.2s ease-out forwards;
+}
+
+@keyframes fadeInScaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.splash-subtitle {
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 10px;
+}
+
+.splash-title {
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    text-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.splash-details {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--bunge-green); /* Usando sua variável de cor! */
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+/* ======================================================= */
+
+        :root {
+            --bunge-blue: #002d5d;
+            --bunge-green: #0CBC8C;
+            --bg-page: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-dark: #343a40;
+            --text-light: #6c757d;
+            --border-color: #dee2e6;
+            --status-red: #dc3545;
+            --status-orange: #fd7e14;
+            --status-yellow: #ffc107;
+            --status-green: #28a745;
+            --schema-bg: #f8f9fa;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-page); color: var(--text-dark); }
+        
+        /* Cover Page Styles */
+        #cover-page {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(rgba(0, 45, 93, 0.85), rgba(0, 45, 93, 0.95)), url('https://i.imgur.com/8Y1hVxF.jpg') no-repeat center center;
+            background-size: cover;
+            color: white;
+            text-align: center;
+            padding: 40px;
+            animation: fadeInCover 1s ease-in-out;
+        }
+        @keyframes fadeInCover { from { opacity: 0; } to { opacity: 1; } }
+        #cover-page h1 { font-size: 48px; font-weight: 700; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        #cover-page h2 { font-size: 24px; font-weight: 400; margin-bottom: 30px; color: rgba(255,255,255,0.8); }
+        #cover-page .author-block { margin-top: 20px; }
+        #cover-page .author-block p { margin: 2px 0; font-size: 18px; }
+        #cover-page .author-block .title { font-size: 16px; color: rgba(255,255,255,0.7); }
+        #cover-page button { margin-top: 40px; padding: 15px 30px; font-size: 18px; font-weight: 600; background-color: var(--bunge-green); color: white; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        #cover-page button:hover { background-color: #0da497; transform: translateY(-3px); }
+
+        /* Main Content Layout */
+        .main-container { display: none; }
+        .sticky-header { position: sticky; top: 0; z-index: 1020; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        header { background-color:
+         background-color: #002d5d; /* Fallback para navegadores antigos */
+    background-image: linear-gradient(to bottom right, #1E536C, #0A2840);
+        
+        
+         color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .header-logo img { height: 35px; /* Filter removido da lógica, pois a nova imagem já é branca */ }
+        .header-title h1 {
+    margin: 0;
+    font-size: 20px;          /* Tamanho base para a primeira linha */
+    font-weight: 300;         /* Deixa a primeira linha mais leve e elegante */
+    text-align: right;        /* Alinha todo o bloco de texto à direita */
+    line-height: 1.2;         /* Melhora o espaçamento entre as linhas */
+}
+
+.header-title h1 strong {
+    display: block;           /* ESSENCIAL: Faz o nome do projeto pular para a linha de baixo */
+    font-weight: 900;         /* Peso extra-negrito para impacto máximo */
+    font-size: 1.25em;        /* Deixa a fonte 25% maior que a do h1 (20px * 1.25 = 25px) */''
+    color: #ffffff;
+    letter-spacing: 0.5px;    /* Leve espaçamento para um toque premium */
+}
+        nav { background-color: var(--card-bg); border-bottom: 1px solid var(--border-color); padding: 0 30px; overflow-x: auto; }
+        nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: nowrap; }
+        nav li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--text-light); font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; transition: all 0.2s ease-in-out; white-space: nowrap; }
+        nav li a.active, nav li a:hover { color: var(--bunge-blue); border-bottom-color: var(--bunge-blue); }
+        main { display: none; padding: 25px; animation: fadeIn 0.5s ease; }
+        main.active { display: block; }
+        
+        .content-card { max-width: 1200px; margin: 0 auto; background-color: var(--card-bg); padding: 30px 40px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .content-card h2 { font-size: 24px; color: var(--bunge-blue); padding-bottom: 15px; margin-top: 0; margin-bottom: 25px; border-bottom: 3px solid var(--bunge-green); }
+        .content-card h3 { font-size: 20px; color: var(--bunge-blue); margin-top: 35px; margin-bottom: 20px; }
+        .content-card h4 { color: var(--text-dark); margin-top: 25px; }
+        .content-card p, .content-card ul li, .content-card ol li { line-height: 1.7; font-size: 16px; }
+        .content-card ol, .content-card ul { padding-left: 20px; }
+        .content-card ol li { margin-bottom: 15px; padding-left: 5px; }
+        .content-card li { margin-bottom: 10px; }
+
+        /* KPI Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 25px; margin-top: 20px;}
+        .kpi { background-color: #fff; border-radius: 8px; padding: 20px; border: 1px solid var(--border-color); border-left: 5px solid; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: all 0.2s ease-in-out; }
+        .kpi:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.08); }
+        .kpi .value { font-size: 38px; font-weight: 700; color: var(--bunge-blue); line-height: 1.1; margin-bottom: 5px; }
+        .kpi .label { font-size: 14px; color: var(--text-light); }
+        .kpi.blue { border-left-color: var(--bunge-blue); } .kpi.red { border-left-color: var(--status-red); } .kpi.orange { border-left-color: var(--status-orange); } .kpi.green { border-left-color: var(--bunge-green); }
+
+        /* Cards and Tables */
+        .card { background-color: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card-header { padding: 15px 20px; font-weight: 700; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        .card-body { padding: 20px; }
+        pre code { display: block; background-color: #1E1E1E; /* Cor de fundo do VS Code */ color: #d4d4d4; padding: 15px; border-radius: 5px; font-family: 'Consolas', 'Monaco', monospace; font-size: 13px; margin-top: 8px; white-space: pre-wrap; word-break: break-all; }
+        
+        #diagnostico-arquitetura .content-card, #impacto-capacidade .content-card, #arquitetura-fluxo .content-card, #plano-acao .content-card, #diagnostico-avancado .content-card, #proposta-redesign .content-card { max-width: none; }
+        
+        /* DB Schema Diagram Styles */
+        #diagnostico-arquitetura .legend-bar { display: flex; gap: 20px; background-color: var(--card-bg); padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-color); justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
+        #diagnostico-arquitetura .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+        #diagnostico-arquitetura .legend-color { width: 15px; height: 15px; border-radius: 3px; }
+        #diagnostico-arquitetura .schema-container-wrapper { display: flex; gap: 25px; flex-wrap: wrap;}
+        #diagnostico-arquitetura .schema-container { flex-grow: 1; background-color: var(--schema-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; position: relative; height: 85vh; overflow: auto; }
+        #diagnostico-arquitetura #schema-canvas { position: relative; width: 1500px; height: 1200px; }
+        #diagnostico-arquitetura .db-table { position: absolute; background-color: white; border: 1px solid #adb5bd; border-radius: 6px; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); cursor: pointer; transition: all 0.2s ease-in-out; min-width: 210px; z-index: 10; }
+        #diagnostico-arquitetura .db-table:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 8px 16px rgba(0,0,0,0.15); z-index: 100; }
+        #diagnostico-arquitetura .db-table .header { color: white; padding: 8px 12px; font-weight: bold; border-top-left-radius: 5px; border-top-right-radius: 5px; }
+        #diagnostico-arquitetura .db-table .columns { padding: 12px; max-height: 200px; overflow-y: auto;}
+        #diagnostico-arquitetura .db-table .column { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f1f3f5; }
+        #diagnostico-arquitetura .db-table .column:last-child { border-bottom: none; }
+        #diagnostico-arquitetura .db-table .column .type { color: #adb5bd; }
+        #diagnostico-arquitetura .sidebar { width: 100%; min-width: 300px; flex-shrink: 0; }
+        @media (min-width: 1200px) {
+            #diagnostico-arquitetura .schema-container-wrapper { flex-wrap: nowrap;}
+            #diagnostico-arquitetura .sidebar { width: 480px; }
+        }
+        
+        /* Summary and Helper Boxes */
+        .summary-box { background-color: #e7f3ff; border-left: 5px solid #005a9e; padding: 20px; margin-bottom: 30px; border-radius: 5px; }
+        .summary-box ul { list-style-type: none; padding: 0; margin: 0; }
+        .summary-box li { margin-bottom: 15px; font-size: 16px; }
+        .summary-box strong { color: var(--bunge-blue); }
+        .explanation-box { background-color: #f8f8f8; padding: 20px; border-left: 4px solid #6c757d; margin-top: 30px; border-radius: 4px; }
+
+        /* Flow Architecture & Timeline */
+        .flow-container { display: flex; align-items: stretch; justify-content: center; flex-wrap: wrap; gap: 15px; padding: 20px 0; }
+        .flow-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; text-align: center; width: 200px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: center; position: relative;}
+        .flow-item .icon { font-size: 2.5em; color: var(--bunge-blue); margin-bottom: 10px; }
+        .flow-item h4 { margin: 10px 0 5px 0; font-size: 14px; color: var(--text-dark); }
+        .flow-item p { font-size: 12px; color: var(--text-light); margin: 0; }
+        .flow-arrow { font-size: 2em; color: var(--text-light); align-self: center; }
+        .flow-bottleneck { border: 2px solid var(--status-red); background-color: #fff6f6; }
+        .flow-bottleneck .icon { color: var(--status-red); animation: pulse 1.5s infinite; }
+        .flow-victim { border-style: dashed; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
+        .timeline { display: flex; flex-direction: column; gap: 20px; }
+        .timeline-step { display: flex; gap: 20px; align-items: flex-start; }
+        .timeline-phase { flex-shrink: 0; width: 150px; text-align: right; }
+        .timeline-phase h4 { margin: 0; font-size: 18px; color: var(--bunge-blue); }
+        .timeline-phase span { font-size: 12px; color: var(--text-light); }
+        .timeline-content { border-left: 3px solid var(--border-color); padding-left: 20px; flex-grow: 1; }
+        .timeline-actor { display: inline-block; background-color: var(--bunge-blue); color: white; padding: 3px 10px; border-radius: 50px; font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .timeline-actor.dba { background-color: var(--status-orange); }
+        .timeline-tasks { list-style-type: none; padding-left: 0; margin: 0; }
+        .timeline-tasks li { position: relative; padding-left: 25px; margin-bottom: 10px; }
+        .timeline-tasks li::before { content: '\f058'; font-family: 'Font Awesome 6 Free'; font-weight: 900; color: var(--bunge-green); position: absolute; left: 0; top: 2px; }
+
+        /* Org Chart */
+        .org-chart { padding: 20px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid var(--border-color); }
+        .org-item { display: flex; align-items: center; background-color: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px 15px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .org-item .details { font-size: 14px; }
+        .org-item .details strong { display: block; color: var(--text-dark); }
+        .org-item .details span { color: var(--text-light); font-size: 12px; }
+        .org-item.manager { border-left: 4px solid var(--bunge-blue); }
+        .org-item.analyst { border-left: 4px solid var(--bunge-green); margin-left: 20px;}
+        .org-item.partner { border-left: 4px solid var(--status-orange); }
+
+        /* Footer */
+        .report-footer { text-align: center; padding-top: 30px; margin-top: 40px; border-top: 1px solid var(--border-color); }
+        .report-footer img { height: 10px; margin-bottom: 5px; }
+        .report-footer p { font-size: 12px; color: var(--text-light); margin: 0; line-height: 1.6; }
+        .report-footer a { color: var(--bunge-blue); text-decoration: none; font-weight: 600; }
+        .report-footer a:hover { text-decoration: underline; }
+        
+        /* Redesign Proposal Styles */
+        .main-dashboard-area { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: min-content; gap: 20px; }
+        .kpi-card { grid-column: span 1; background: #fff; padding: 20px; border-radius: 8px; border-left: 5px solid var(--bunge-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .kpi-card .label { font-size: 13px; color: var(--text-light); margin-bottom: 0px; }
+        .kpi-card .value { font-size: 2.2em; font-weight: 700; color: var(--bunge-blue); }
+       .chart-card {
+    grid-column: span 2;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+/* E adicione esta nova classe */
+.chart-wrapper {
+    position: relative;
+    height: 280px;
+    width: 100%;
+    margin-bottom: 15px; 
+}
+        .table-card-wrapper { grid-column: span 4; overflow-x: auto;}
+        .table-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .table-card h4 { margin-top: 0; }
+        .styled-table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        .styled-table th, .styled-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .styled-table th { background-color: #f8f9fa; font-weight: 600; color: var(--text-dark);}
+        .styled-table tbody tr:hover { background-color: #f8f9fa; }
+        .how-to-build { background-color: #f8f9fa; border: 1px solid var(--border-color); padding: 10px 15px; margin-top: 15px; border-radius: 5px; font-size: 13px; }
+        .how-to-build p { margin: 0; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <!-- ======================================================= -->
+<!-- PASSO 1: NOVO HTML DA INTRODUÇÃO  -->
+<!-- ======================================================= -->
+<div id="splash-screen">
+    <div class="splash-content">
+        <p class="splash-subtitle">Diagnóstico de Performance e Otimização</p>
+        <h1 class="splash-title">Cargo Flow</h1>
+        <p class="splash-details">Industrial Operations</p>
+    </div>
+</div>
+
+
+
+    <div id="cover-page" style="display: none;">
+        <div class="cover-content">
+            <h2>Diagnóstico e Plano de Otimização</h2>
+            <h1>Cargo Flow</h1>
+            <div class="author-block">
+                <p><ligth>Industrial Operations</ligth></p>
+            </div>
+            <button id="start-analysis-btn"><i class="fa-solid fa-arrow-right"></i> Iniciar Análise</button>
+        </div>
+    </div>
+
+    <div class="main-container" style="display: block;">
+        <div class="sticky-header">
+            <!-- ======================================================= -->
+<!-- PASSO 1: HTML DA TARJA (COLE APÓS O STICKY-HEADER)      -->
+<!-- ======================================================= -->
+<div id="critical-alert-banner">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>PONTO CRÍTICO DO PROJETO: A Fonte de Dados</span>
+</div>
+<!-- ======================================================= -->
+            <header>
+     <div class="header-logo">
+    <img src="https://vumbnail.com/1098278692.jpg" alt="Logo Bunge" style="height: 90px; width: auto; filter: none;" onerror="this.src='https://placehold.co/150x35/002d5d/ffffff?text=Logo'; this.onerror=null;">
+</div>
+<div class="header-title">
+    <h1>
+        <span>Diagnóstico de Performance</span>
+        <strong>Cargo Flow</strong>
+    </h1>
+</div>
+            </header>
+            <nav>
+                <ul>
+                    <li><a href="#" class="nav-link active" data-target="apresentacao"><i class="fa-solid fa-person-chalkboard"></i> Apresentação</a></li>
+                    <li><a href="#" class="nav-link" data-target="resumo-executivo"><i class="fa-solid fa-tachometer-alt"></i> Resumo Executivo</a></li>
+                    <li><a href="#" class="nav-link" data-target="impacto-capacidade"><i class="fa-solid fa-chart-pie"></i> Impacto na Capacidade</a></li>
+                    <li><a href="#" class="nav-link" data-target="uso-frequencia"><i class="fa-solid fa-users-line"></i> Análise de Uso</a></li>
+                    <li><a href="#" class="nav-link" data-target="arquitetura-fluxo"><i class="fa-solid fa-diagram-project"></i> Arquitetura do Fluxo</a></li>
+                   <li><a href="#" class="nav-link problem-section-highlight" data-target="diagnostico-arquitetura"><i class="fa-solid fa-sitemap"></i> Diagnóstico da Fonte (DB)</a></li>
+                    <li><a href="#" class="nav-link" data-target="diagnostico-avancado"><i class="fa-solid fa-gears"></i> Otimização de Consulta</a></li>
+                    <li><a href="#" class="nav-link" data-target="proposta-redesign"><i class="fa-solid fa-drafting-compass"></i> Proposta de Redesign</a></li>
+                    <li><a href="#" class="nav-link" data-target="plano-acao"><i class="fa-solid fa-list-check"></i> Plano de Ação</a></li>
+                </ul>
+            </nav>
+        </div>
+        
+        <!-- SECTIONS FROM V24 + V23 MERGED -->
+        <main id="apresentacao" class="active">
+            <div class="content-card">
+                <h3><i class="fa-solid fa-flag-checkered"></i> Escopo e Objetivo do Projeto</h3>
+                <p>O relatório <strong>Cargo Flow</strong> é uma ferramenta vital para o departamento de <strong>Industrial Operations</strong>, fornecendo uma visão detalhada do fluxo de cargas, pesagens e classificações. O seu objetivo é permitir a monitoria e a gestão eficiente das operações em diversas filiais. Este projeto de otimização está diretamente ligado à estrutura de Armazenagem, sob a gestão de <strong>Anderson dos Santos Cursino</strong>, e conta com o apoio técnico da equipe de BT.</p>
+                <div class="org-chart">
+                    <div class="org-item manager"><div class="details"><strong>Anderson dos Santos Cursino</strong><span>Gte Sr Armazenagem, Industrial Management</span></div></div>
+                    <div class="org-item analyst"><div class="details"><strong>Fabiel da Silva Valardao</strong><span>Anl Controles Internos Sr, Industrial Operations</span></div></div>
+                    <div class="org-item partner"><div class="details"><strong>Nasser Ibrahim Muhieddine</strong><span>Espec Projetos II, BT BTPs &amp; Global Biz Ops</span></div></div>
+                </div>
+                <h3><i class="fa-solid fa-lightbulb"></i> Desmistificando a Causa Raiz: Ferramenta vs. Arquitetura</h3>
+                <p><strong>Introdução:</strong> Após um longo período de instabilidade e performance degradada, onde a ferramenta de BI era frequentemente apontada como a raiz dos problemas, nossa análise profunda e técnica revela uma realidade diferente. Este diagnóstico demonstra que o Power BI tem operado como uma vítima de uma arquitetura de dados subjacente que precisa de reestruturação, e não como o vilão da história.</p>
+                <p><strong>Desenvolvimento - A Ilusão da Migração:</strong> Aventou-se a ideia de migrar este projeto para outras plataformas, como Tableau conectado ao Google Cloud Platform (GCP). É crucial entender por que essa abordagem não só falharia em resolver o problema, como poderia agravar a situação:</p>
+                <ul>
+                    <li><strong>O Gargalo Persiste:</strong> O problema central não é onde os dados são exibidos, mas como são extraídos. Tanto o Power BI quanto o Tableau precisariam consultar a mesma `VIEW` ineficiente no SQL Server. A lentidão e o alto processamento na origem continuariam, independentemente da ferramenta na ponta. Seria como colocar um motor de Fórmula 1 em um carro com pneus quadrados — o problema não é o motor.</li>
+                    <li><strong>O Modelo de Consumo da Nuvem:</strong> Plataformas como o Google BigQuery operam em um modelo de "pagamento por dados lidos". Executar uma query ineficiente que varre tabelas gigantescas no GCP seria financeiramente punitivo, potencialmente elevando o custo em vez de reduzi-lo. A nuvem não corrige arquiteturas ruins; ela as escala, junto com seus custos.</li>
+                </ul>
+                <p><strong>Conclusão - A Solução Profissional:</strong> Mover o problema de um sistema para outro é uma solução paliativa que não ataca a causa raiz, apenas "empurra o problema para debaixo do tapete". A proposta deste diagnóstico é realizar uma reestruturação profissional e sólida na fonte dos dados. Ao consertar a `VIEW` e otimizar as consultas, garantimos uma solução sustentável que beneficia qualquer ferramenta que consuma esses dados, hoje ou no futuro, e que efetivamente melhora a performance e a eficiência dos recursos da companhia.</p>
+            <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+        
+        <main id="resumo-executivo">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-rocket"></i> Resumo Executivo: Oportunidade de Otimização</h2>
+                <p><strong>Metáfora do Problema:</strong> Imagine uma rodovia principal constantemente congestionada por um único veículo ineficiente, atrasando todas as outras entregas. O processo de dados do <strong>CARGO FLOW FULL</strong> está agindo dessa forma em nossa infraestrutura de dados: seu alto e contínuo consumo de capacidade de processamento cria "gargalos" que afetam a estabilidade de todo o ecossistema.</p>
+                <div class="kpi-grid">
+                    <div class="kpi blue"><div class="value">~26%</div><div class="label">do Consumo Total da Capacidade</div></div>
+                    <div class="kpi red"><div class="value">~70%</div><div class="label">de Capacidade Ociosa no Processo</div></div>
+                    <div class="kpi orange"><div class="value">25+</div><div class="label">Falhas de Atualização (14 dias)</div></div>
+                    <div class="kpi green"><div class="value">53</div><div class="label">Usuários Únicos Impactados</div></div>
+                </div>
+                <p style="margin-top: 30px;">Esta análise propõe uma reestruturação colaborativa. Ao otimizar a fonte de dados e alinhar a frequência de atualização à demanda real, podemos não apenas eliminar as falhas de memória, mas também gerar uma liberação massiva de capacidade para outros projetos críticos e para a saúde geral da plataforma.</p>
+            <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+
+        <main id="metricas-atuais">
+        <div class="content-card">
+            <h2><i class="fa-solid fa-ruler-combined"></i> Métricas Atuais de Performance (Baseline)</h2>
+            <p>
+                Para quantificar o sucesso das otimizações propostas, é fundamental estabelecer uma linha de base (baseline) com os números de performance atuais. Estas métricas representam o "antes" e servirão como ponto de comparação para o "depois", demonstrando o ganho real em eficiência, estabilidade e custo.
+            </p>
+            <div class="kpi-grid">
+                <div class="kpi red">
+                    <div class="value">&gt; 45 min</div>
+                    <div class="label">Tempo Médio de Atualização</div>
+                </div>
+                <div class="kpi orange">
+                    <div class="value">~8.5 GB</div>
+                    <div class="label">Pico de Memória (Dataflow)</div>
+                </div>
+                <div class="kpi orange">
+                    <div class="value">~18%</div>
+                    <div class="label">Taxa de Falha de Atualização</div>
+                </div>
+                <div class="kpi blue">
+                    <div class="value">~3.2k CUs</div>
+                    <div class="label">Custo Médio por Atualização</div>
+                </div>
+            </div>
+            <div class="explanation-box">
+                <h4>O que estes números significam?</h4>
+                <p>
+                    O <strong>longo tempo de atualização</strong> e o <strong>alto consumo de memória</strong> são sintomas diretos da ineficiência da consulta na fonte, levando a uma <strong>alta taxa de falhas</strong>. O <strong>custo em CUs (Capacity Units)</strong> representa o "gasto de energia" do nosso ambiente a cada tentativa de atualização, um custo que se repete mais de 40 vezes por dia, muitas vezes sem sucesso.
+                </p>
+            </div>
+            <div class="report-footer">
+                <img src="https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-png-transparent.png" alt="Logo Bunge" height="25" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;">
+                <p>Relatório preparado por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p>
+            </div>
+        </div>
+    </main>
+        
+
+        <main id="impacto-capacidade">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-chart-pie"></i> Impacto e Análise de Capacidade</h2>
+                <div class="summary-box">
+                    <h3>Resumo Estratégico para Tomada de Decisão</h3>
+                    <ul>
+                        <li><strong>1. Concentração de Consumo:</strong> Nosso processo <strong>CARGO FLOW FULL</strong>, sozinho, é responsável por <strong>26% de todo o consumo de capacidade</strong> da nossa plataforma Microsoft Fabric. Otimizá-lo é a nossa maior oportunidade de ganho de eficiência.</li>
+                        <li><strong>2. Risco Operacional por Sobrecarga:</strong> A plataforma registrou mais de <strong>98 horas de sobrecarga</strong> em um único item, levando a lentidão e mais de <strong>2.300 tentativas de acesso falhas</strong> por parte dos usuários. Isso impacta diretamente a produtividade e a confiança nos dados.</li>
+                        <li><strong>3. Oportunidade de Liberação de Recursos:</strong> A otimização proposta pode liberar uma quantidade significativa de Unidades de Capacidade (CUs), que hoje são consumidas em horários de baixíssimo uso, para serem usadas em novos projetos ou para garantir a estabilidade de processos mais críticos durante o pico de operação.</li>
+                    </ul>
+                </div>
+                <h3>Nossa Plataforma de Dados como um Ecossistema</h3>
+                <p>Para entender onde nosso investimento em capacidade está sendo alocado, podemos tratar o consumo da plataforma como um portfólio. A tabela abaixo detalha os 10 maiores "consumidores de energia" do nosso ecossistema, que juntos somam quase 60% do consumo total.</p>
+                <div class="table-card-wrapper">
+                    <table class="styled-table">
+                        <thead><tr><th>Ranking</th><th>Item / Nome do Projeto</th><th>Uso (% do Total da Capacidade)</th><th>Observação Estratégica</th></tr></thead>
+                        <tbody>
+                            <tr><td>1º</td><td><strong>CARGO FLOW FULL (Dataflow)</strong></td><td><strong>26.0%</strong></td><td>De longe o maior consumidor. Sua otimização é crítica.</td></tr>
+                            <tr><td>2º</td><td>DDB-B-BR-10-CSDataBaseArea-BUSR</td><td><strong>9.9%</strong></td><td style="color: var(--status-red);">Alto consumo e principal causador de sobrecarga.</td></tr>
+                            <tr><td>3º</td><td>RTISample (Vessel Management)</td><td><strong>6.1%</strong></td><td>Consumo significativo para um único sistema. Requer avaliação de ROI.</td></tr>
+                            <tr><td>4º</td><td>Mega Finance Controls Dashboard</td><td><strong>5.0%</strong></td><td>Alto consumo para um número moderado de usuários (17).</td></tr>
+                            <tr><td>5º</td><td>Monitoring Eventhouse</td><td><strong>4.0%</strong></td><td>Outro sistema de monitoramento com consumo relevante.</td></tr>
+                            <tr><td>6º</td><td>Gestão a Vista Snow Versão 2.0</td><td><strong>3.8%</strong></td><td>Dataset grande (7.8 GB) com consumo considerável.</td></tr>
+                            <tr><td>7º</td><td>RTISample (BG&amp;VT Integration)</td><td><strong>3.6%</strong></td><td>Terceiro item de monitoramento na lista, indicando um padrão.</td></tr>
+                            <tr><td>8º</td><td>CI DEVOPS</td><td><strong>3.1%</strong></td><td>Consumo relevante para um relatório interno de TI.</td></tr>
+                            <tr><td>9º</td><td>Prioritized Improvements</td><td><strong>3.1%</strong></td><td>Custo similar ao anterior, dentro do mesmo projeto.</td></tr>
+                            <tr><td>10º</td><td>Prioritized Enhancements</td><td><strong>3.0%</strong></td><td>Terceiro item do projeto "Business Technology" com alto consumo.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="explanation-box">
+                    <h3>A Capacidade Contratada e Nossa Vantagem Estratégica</h3>
+                    <p>A escolha de alocar nossa licença na região <strong>North Europe</strong> e utilizar o modelo de <strong>Reserva de 1 Ano</strong> nos concede um desconto de 41% no custo da capacidade. Essa decisão estratégica otimiza o orçamento, mas reforça a necessidade de usar a capacidade adquirida da forma mais eficiente possível para maximizar o retorno sobre o investimento.</p>
+                </div>
+           <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+
+        <main id="uso-frequencia">
+             <div class="content-card">
+                <h2><i class="fa-solid fa-clock"></i> Análise de Uso: Demanda vs. Oferta de Dados</h2>
+                <p>A análise dos logs de uso de Junho a Setembro revela um padrão consistente: um desalinhamento total entre o consumo de capacidade (quando atualizamos) e a geração de valor (quando os usuários acessam a informação). Enquanto o dataflow tenta atualizar <strong>quase de hora em hora (24/7)</strong>, o acesso ao relatório é majoritariamente comercial.</p>
+                 <div style="height: 400px; margin-top: 20px; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;"><canvas id="usageChart"></canvas></div>
+                 <p style="text-align: center; font-size: 14px; color: var(--text-light); margin-top: 15px;">O gráfico demonstra o <strong>uso diário real</strong> do relatório, com picos claros durante os dias úteis e quedas acentuadas nos fins de semana. Isso reforça a tese de que uma atualização 24/7 é desnecessária.</p>
+                 <h3>Questionamentos Estratégicos</h3>
+                 <ol>
+                     <li>Qual o impacto de negócio de não ter os dados atualizados em tempo real entre 18:00 e 08:00?</li>
+                     <li>Dado o padrão de uso, uma atualização agendada para <strong>08:00, 12:00 e 17:00 em dias úteis</strong> atenderia à necessidade de negócio?</li>
+                     <li>A liberação de capacidade e a estabilização do ambiente justificam a revisão deste processo de atualização?</li>
+                 </ol>
+             <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+
+        <main id="arquitetura-fluxo">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-diagram-project"></i> Arquitetura do Fluxo de Dados: O Efeito Cascata</h2>
+                <p>Para entender a causa raiz da ineficiência, é crucial visualizar o fluxo completo de dados. O processo não é uma simples conexão do relatório ao banco, mas uma cadeia de dependências onde a ineficiência é carregada de uma etapa para a outra.</p>
+                <h3>Fluxo de Atualização Atual e o Verdadeiro Gargalo</h3>
+                <div class="flow-container">
+                    <div class="flow-item flow-bottleneck"><div class="icon"><i class="fa-solid fa-database"></i></div><h4>1. Construção da VIEW</h4><p>No SQL Server, a VIEW <code>CARGO_FLOW_FULL</code> executa <strong>18 JOINs</strong> e agrega dados de <strong>17 tabelas</strong>. É o epicentro da lentidão.</p></div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-item"><div class="icon"><i class="fa-solid fa-robot"></i></div><h4>2. Gatilho de Atualização</h4><p>Power Automate força a atualização a cada <strong>30 minutos</strong> (24/7), reiniciando o ciclo de ineficiência.</p></div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-item flow-victim"><div class="icon"><i class="fa-solid fa-layer-group"></i></div><h4>3. Dataflow Gen2 (Refém)</h4><p>Conecta e espera o SQL construir a VIEW, herdando toda a lentidão e consumindo alta capacidade.</p></div>
+                     <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-item flow-victim"><div class="icon"><i class="fa-solid fa-chart-line"></i></div><h4>4. Relatório Power BI (Vítima)</h4><p>Consome os dados lentos do Dataflow, resultando em falhas de memória e timeouts para o usuário.</p></div>
+                </div>
+                <h3>Análise da Conexão e Ineficiência</h3>
+                <p>O diagrama acima deixa claro que: </p>
+                <ul>
+                    <li>O <strong>Gargalo Crítico</strong> ocorre na Etapa 1. Cada vez que o Power Automate dispara uma atualização, o SQL Server é forçado a reconstruir uma `VIEW` extremamente complexa.</li>
+                    <li>O **Power BI (Dataflow e Relatório) é uma vítima** do processo. Ele simplesmente solicita os dados e é forçado a esperar pela lenta resposta do banco. A alta utilização de memória e as falhas de atualização são **sintomas**, não a causa raiz.</li>
+                </ul>
+                 <p><strong>Conclusão da Análise:</strong> A solução definitiva não está em ajustar o Power BI, mas sim em otimizar a forma como os dados são entregues pelo SQL Server. Ao consertar a fonte, todo o ecossistema se beneficia.</p>
+           <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+        
+        <main id="diagnostico-arquitetura">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-sitemap"></i> Diagnóstico da Fonte de Dados (Banco de Dados)</h2>
+                <p>Abaixo, um diagrama interativo representando a arquitetura da `VIEW` no banco de dados. As cores indicam o nível de criticidade de cada tabela na performance geral da consulta. Clique em uma tabela para ver a análise detalhada e as recomendações técnicas para a equipe de DBA.</p>
+                <div class="dashboard-container">
+                    <div class="legend-bar">
+                        <div class="legend-item"><div class="legend-color" style="background-color: var(--status-red);"></div>Crítico</div>
+                        <div class="legend-item"><div class="legend-color" style="background-color: var(--status-orange);"></div>Atenção</div>
+                        <div class="legend-item"><div class="legend-color" style="background-color: var(--status-yellow);"></div>Melhorável</div>
+                        <div class="legend-item"><div class="legend-color" style="background-color: var(--status-green);"></div>OK</div>
+                    </div>
+                    <div class="schema-container-wrapper">
+                        <div class="schema-container"><div id="schema-canvas"></div></div>
+                        <aside class="sidebar">
+                            <div class="card" id="details-panel-arch" style="flex-grow: 1; overflow-y: auto;">
+                                <div class="card-header"><i class="fa-solid fa-magnifying-glass-chart"></i>Análise da Tabela</div>
+                                <div class="card-body">
+                                    <div class="placeholder" style="text-align: center; color: #ccc;"><i class="fa-solid fa-hand-pointer fa-2x" style="margin-bottom:15px;"></i><p>Clique em uma tabela no diagrama para ver o diagnóstico e as recomendações.</p></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+           <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+
+        <main id="diagnostico-avancado">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Definindo a Responsabilidade: O Papel da Fonte de Dados</h2>
+                
+                <p>A análise revela que a forma mais impactante de otimizar este relatório é delegar o trabalho pesado para onde ele pertence: o banco de dados. A estratégia correta não é fazer "limpezas" no Power Query, mas sim garantir que a fonte de dados — a `VIEW` — já entregue os dados de forma otimizada.</p>
+                <p>A metáfora é a de um restaurante: o Power BI é o "Chef de Cozinha", e o Banco de Dados é o "Fornecedor". Atualmente, o fornecedor entrega uma caixa com todos os ingredientes misturados e sujos, forçando o Chef a gastar horas limpando e preparando tudo. O ideal é que o fornecedor entregue uma "Mise en Place" perfeita, com cada ingrediente já cortado, limpo e pronto para o uso.</p>
+
+                <div class="comparison-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 30px;">
+                    <div class="scenario-box" style="background-color: #f8f9fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px;">
+                        <h4 style="margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; color: #dc3545;"><i class="fa-solid fa-times-circle"></i> Problema Atual: O Power BI faz o trabalho do DBA</h4>
+                        <p style="font-size: 14px;">O Power BI se conecta a uma `VIEW` genérica e é forçado a fazer um `SELECT *`, trazendo todas as colunas. A ineficiência da `VIEW` (JOINs lentos, falta de índices) é herdada, e o Power BI sofre para processar um volume de dados muito maior do que o necessário.</p>
+                    </div>
+                    <div class="scenario-box" style="background-color: #f8f9fa; border: 1px solid var(--border-color); border-radius: 8px; padding: 25px;">
+                        <h4 style="margin-top: 0; font-size: 18px; display: flex; align-items: center; gap: 10px; color: #28a745;"><i class="fa-solid fa-check-circle"></i> Solução Proposta: O DBA prepara os dados para o Power BI</h4>
+                        <p style="font-size: 14px;">O DBA utiliza a lógica otimizada para construir uma <strong>nova `VIEW` performática</strong>. Com isso, o Power BI pode se conectar a ela de forma simples e limpa, recebendo apenas os dados essenciais, já tratados e prontos para uso.</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 40px;"><i class="fa-solid fa-database"></i> A "Receita" para a VIEW Otimizada (Trabalho do DBA)</h3>
+                <p>A query abaixo não deve ser usada no Power BI. Ela serve como <strong>a especificação técnica para a equipe de DBA</strong> construir a nova `VIEW` no banco de dados. Ela seleciona apenas as colunas necessárias e aplica a lógica de negócio na camada correta.</p>
+                <pre><code class="language-sql">
+-- Blueprint para a nova VIEW a ser criada pelo DBA no SQL Server.
+-- Ex: CREATE VIEW dbo.VW_CARGO_FLOW_OTIMIZADA AS
+
+SELECT
+    tc.TicketId             AS TicketID,
+    ts.StatusDescription    AS Status,
+    tc.TicketCreationdDate  AS DataCriacao,
+    tc.TicketEndDate        AS DataFim,
+    pc.ProcessName          AS Processo,
+    tc.BranchId             AS FilialID,
+    my.MovementTypeDs       AS TipoMovimento,
+    (tw.GrossWeightQt - tw.TareWeightQt) AS PesoLiquido,
+    m1.MaterialName         AS NomeMaterial,
+    bc.BranchName           AS NomeFilial,
+    rb.RegionalName         AS Regional
+FROM
+    dbo.TICKET_CONTROL AS tc
+LEFT JOIN dbo.TICKET_STATUS AS ts ON tc.StatusTicketId = ts.ID
+LEFT JOIN dbo.PROCESS AS pc ON tc.ProcessId = pc.ID
+LEFT JOIN dbo.MOVEMENT_TYPE AS my ON tc.MovementTypeId = my.ID
+LEFT JOIN dbo.TICKET_WEIGHT AS tw ON tc.StringKeyID = tw.StringKeyID
+LEFT JOIN dbo.TICKET_MATERIAL AS tm ON tc.StringKeyID = tm.StringFkID AND tm.DeleteDt IS NULL
+LEFT JOIN dbo.MATERIAL AS m1 ON tm.MaterialId = m1.MaterialId
+LEFT JOIN dbo.BRANCH AS bc ON tc.BranchId = bc.BranchId
+LEFT JOIN dbo.REGIONAL_BUNGE AS rb ON bc.RegionalId = rb.ID
+WHERE
+    tc.TicketCancellationDate IS NULL;
+                </code></pre>
+                
+                <h3 style="margin-top: 40px;"><i class="fa-solid fa-chart-simple"></i> Conexão Simplificada no Power BI (Nosso Lado)</h3>
+                <p>Uma vez que a `VIEW` otimizada esteja disponível no banco, a conexão no Power Query se torna extremamente simples e performática. O `Query Folding` será máximo e a atualização, muito mais rápida.</p>
+                <pre><code class="language-sql">
+-- Conexão simples e direta à VIEW já otimizada, resultando em um "SELECT *" performático.
+let
+    Origem = Sql.Database("c2206", "PORTSOLUTION_VIEWS"),
+    Dados = Origem{[Schema="dbo", Item="VW_CARGO_FLOW_OTIMIZADA"]}[Data]
+in
+    Dados
+                </code></pre>
+               <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;">
+                    <p>Relatório preparado por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p>
+                </div>
+            </div>
+        </main>
+        
+        <main id="proposta-redesign">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-drafting-compass"></i> Proposta de Redesign: De Dados Brutos a Insights Acionáveis</h2>
+                <p><strong>Visão:</strong> O dashboard atual, embora funcional, apresenta os dados de forma muito densa, em grandes tabelas que exigem esforço do usuário para extrair informações. A proposta visa transformar essa experiência, apresentando os indicadores mais críticos de forma clara e imediata, e usando gráficos para revelar tendências e comparações que hoje estão ocultas nos números.</p>
+                <div style="margin-top:30px;">
+                 <div class="main-dashboard-area">
+    <!-- KPIs (sem alteração) -->
+    <div class="kpi-card"><div class="label">Volume Recebido (TON)</div><div class="value">460.7K</div></div>
+    <div class="kpi-card"><div class="label">Volume Expedido (TON)</div><div class="value">77.0K</div></div>
+    <div class="kpi-card"><div class="label">Umidade Média Receb.</div><div class="value">12.67%</div></div>
+    <div class="kpi-card"><div class="label">Veículos em Fila (Agora)</div><div class="value">15</div></div>
+
+    <!-- Primeiro Gráfico (COM A CORREÇÃO) -->
+    <div class="chart-card">
+        <div class="chart-wrapper">
+            <canvas id="volumeRegionalChart"></canvas>
+        </div>
+        <div class="how-to-build"><p><strong>Como Construir:</strong><br><strong>Visual:</strong> Gráfico de Barras. <strong>Eixo Y:</strong> Campo 'Regional'. <strong>Eixo X:</strong> Medida de `SUM(PesoLiquido) / 1000`.</p></div>
+    </div>
+
+    <!-- Segundo Gráfico (COM A CORREÇÃO) -->
+    <div class="chart-card">
+        <div class="chart-wrapper">
+            <canvas id="fluxoDiarioChart"></canvas>
+        </div>
+        <div class="how-to-build"><p><strong>Como Construir:</strong><br><strong>Visual:</strong> Gráfico de Linha. <strong>Eixo X:</strong> Campo 'Hora do Evento'. <strong>Eixo Y:</strong> Medida de `DISTINCTCOUNT(PlacaVeiculo)`.</p></div>
+    </div>
+
+    <!-- Tabela de Detalhamento (sem alteração) -->
+    <div class="table-card-wrapper">
+        <div class="table-card">
+            <h4><i class="fa-solid fa-magnifying-glass"></i> Detalhamento Operacional por Filial</h4>
+            <table class="styled-table">
+                <thead><tr><th>Regional/Filial</th><th style="text-align:right;">Vol. Recebido (TON)</th><th style="text-align:right;">Umidade Média</th><th style="text-align:right;">Avariados Médio</th><th style="text-align:right;">Nº Veículos</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>MT1 / ALTA FLORESTA</strong></td><td style="text-align:right;">24,1 K</td><td style="text-align:right;">12,92%</td><td style="text-align:right;">4,52%</td><td style="text-align:right;">484</td></tr>
+                    <tr><td><strong>MT1 / DIAMANTINO</strong></td><td style="text-align:right;">44,5 K</td><td style="text-align:right;">14,30%</td><td style="text-align:right;">4,43%</td><td style="text-align:right;">909</td></tr>
+                    <tr><td><strong>SP / SANTOS</strong></td><td style="text-align:right;">102,8 K</td><td style="text-align:right;">11,80%</td><td style-align:right;">3,98%</td><td style="text-align:right;">1.150</td></tr>
+                    <tr><td><strong>BA / BARREIRAS</strong></td><td style="text-align:right;">68,2 K</td><td style="text-align:right;">13,55%</td><td style="text-align:right;">5,10%</td><td style="text-align:right;">1.021</td></tr>
+                    <tr><td><strong>PR / PARANAGUA</strong></td><td style="text-align:right;">95,4 K</td><td style="text-align:right;">12,15%</td><td style="text-align:right;">4,15%</td><td style="text-align:right;">1.105</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+           <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+        
+        <main id="plano-acao">
+            <div class="content-card">
+                <h2><i class="fa-solid fa-list-check"></i> Plano de Ação Estratégico</h2>
+                <h3>Melhorias Já Implementadas (Quick Wins)</h3>
+                <p>A equipe já demonstrou proatividade ao migrar o processo de atualização de um Desktop Gateway, que era um ponto único de falha, para o <strong>Cluster de Gateway Corporativo</strong> (Cluster_Data_Analytics). Isso conferiu maior robustez, alta disponibilidade e escalabilidade ao processo, sendo um excelente primeiro passo.</p>
+
+                <h3>Próximos Passos: Otimização de Ponta a Ponta</h3>
+                <p>A solução definitiva envolve uma colaboração estratégica. As ações são divididas entre melhorias na fonte de dados e na plataforma de BI, conforme o fluxo de execução abaixo.</p>
+                <div class="timeline" style="margin-top: 30px;">
+                    <!-- Fase 1 -->
+                    <div class="timeline-step"><div class="timeline-phase"><h4>Fase 1</h4><span>(1-2 dias)</span></div><div class="timeline-content"><span class="timeline-actor">Equipe de BI</span><h4>Alinhamento e Kick-off</h4><ul class="timeline-tasks"><li>Apresentar este diagnóstico para os stakeholders (Anderson, Fabiel, Nasser).</li><li>Validar a proposta de agendamento de atualização com a área de negócio.</li><li>Definir o "contrato de dados" final com base na query otimizada proposta.</li></ul></div></div>
+                    <!-- Fase 2 -->
+                    <div class="timeline-step"><div class="timeline-phase"><h4>Fase 2</h4><span>(3-5 dias)</span></div><div class="timeline-content"><span class="timeline-actor dba">Equipe de DBA</span><h4>Otimização da Fonte de Dados</h4><ul class="timeline-tasks"><li>Executar `UPDATE STATISTICS` nas tabelas críticas identificadas.</li><li>Analisar e criar os índices não-clusterizados recomendados.</li><li>Criar e disponibilizar uma nova `VIEW` otimizada (ou materializada) para o consumo do BI.</li></ul></div></div>
+                     <!-- Fase 3 -->
+                    <div class="timeline-step"><div class="timeline-phase"><h4>Fase 3</h4><span>(5-7 dias)</span></div><div class="timeline-content"><span class="timeline-actor">Equipe de BI</span><h4>Re-arquitetura do Fluxo de Dados no Fabric</h4><ul class="timeline-tasks"><li>Migrar a extração do Dataflow Gen2 para um Pipeline de dados.</li><li>Alterar a fonte do Pipeline para apontar para a nova VIEW otimizada fornecida pelo DBA.</li><li>Implementar o modelo híbrido (Import + Direct Lake) e a Atualização Incremental.</li><li>Remover as colunas não utilizadas do modelo (Data Diet).</li></ul></div></div>
+                    <!-- Fase 4 -->
+                    <div class="timeline-step"><div class="timeline-phase"><h4>Fase 4</h4><span>(2-3 dias)</span></div><div class="timeline-content"><span class="timeline-actor">Equipe de BI &amp; Negócio</span><h4>Testes e Validação</h4><ul class="timeline-tasks"><li>Executar testes de carga e performance no novo modelo.</li><li>Validar a acuracidade dos dados com a área de negócio (Fabiel).</li><li>Monitorar o consumo de capacidade para quantificar os ganhos.</li></ul></div></div>
+                     <!-- Fase 5 -->
+                     <div class="timeline-step"><div class="timeline-phase"><h4>Fase 5</h4><span>(1 dia)</span></div><div class="timeline-content"><span class="timeline-actor">Equipe de BI</span><h4>Go-Live e Encerramento</h4><ul class="timeline-tasks"><li>Publicar a nova versão do relatório e modelo semântico.</li><li>Desativar o fluxo antigo no Power Automate e o Dataflow Gen2 original.</li><li>Comunicar a conclusão do projeto e os resultados obtidos.</li></ul></div></div>
+                </div>
+            <div class="report-footer"><img src="https://upload.wikimedia.org/wikipedia/commons/0/0c/Bunge_Limited_Logo.svg" alt="Logo Bunge" style="height: 25px; width: auto;" onerror="this.src='https://placehold.co/85x25/f0f2f5/002d5d?text=Logo'; this.onerror=null;"><p>Relatório preparado  por<br><strong>Willian Oliveira</strong><br>Analista de Dados Senior<br><a href="https://teams.microsoft.com/l/chat/0/0?users=willian.oliveira@bunge.com">Para dúvidas, contate via Teams</a></p></div></div>
+        </main>
+        
+  
+<script>
+
+// ===================================================================
+// PASSO 3: NOVO SCRIPT AUTOMÁTICO (COLE NO FINAL DO SEU SCRIPT)
+// ===================================================================
+
+// Pega a referência da nossa nova tela de introdução
+const splashScreen = document.getElementById('splash-screen');
+
+// Função que inicia a transição
+function startReport() {
+    // 1. Deixa a introdução transparente (o CSS faz a animação de fade-out)
+    splashScreen.style.opacity = '0';
+    
+    // 2. Chama a sua função original para mostrar o conteúdo principal
+    showMainContent();
+    
+    // 3. Opcional, mas recomendado: remove a tela do DOM depois que a animação acabar
+    splashScreen.addEventListener('transitionend', () => {
+        splashScreen.remove();
+    });
+}
+
+// A mágica: espera 3000ms (3 segundos) e depois chama a função para começar
+setTimeout(startReport, 3000);
+
+// ===================================================================
+
+    // ===================================================================
+//   COPIE ESTE BLOCO INTEIRO E COLE DENTRO DA SUA TAG <script>
+// ===================================================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Referências aos elementos do HTML ---
+    const navLinks = document.querySelectorAll('.nav-link');
+    const mainContents = document.querySelectorAll('main');
+    const coverPage = document.getElementById('cover-page');
+    const mainContainer = document.querySelector('.main-container');
+    const startBtn = document.getElementById('start-analysis-btn');
+    
+    // ADICIONADO: Referência para a tela de introdução (splash)
+    const splashScreen = document.getElementById('splash-screen');
+    
+    // ADICIONADO: Variável para controlar o timer da tarja de alerta
+    let bannerTimer;
+
+    // --- Variáveis de controle de inicialização ---
+    let usageChartInstance, volumeRegionalChart, fluxoDiarioChart;
+    let architectureDiagramInitialized = false;
+    let redesignChartsInitialized = false;
+
+    // --- LÓGICA DO SPLASH SCREEN AUTOMÁTICO ---
+    // Função que inicia a transição do splash para o conteúdo
+    function startReport() {
+        if (splashScreen) {
+            splashScreen.style.opacity = '0';
+            splashScreen.addEventListener('transitionend', () => splashScreen.remove());
+        }
+        showMainContent();
+    }
+    // A mágica: espera 3 segundos e inicia o relatório
+    setTimeout(startReport, 3000);
+    // --- FIM DA LÓGICA DO SPLASH SCREEN ---
+
+    // Função que mostra o container principal e a primeira aba
+    function showMainContent() {
+        if (coverPage) coverPage.style.display = 'none';
+        if (mainContainer) mainContainer.style.display = 'block';
+        
+        // Verifica se há um #hash na URL para abrir a aba correta
+        const initialTab = window.location.hash ? window.location.hash.substring(1) : 'apresentacao';
+        switchTab(initialTab);
+    }
+    
+    // O botão da capa antiga (mantemos por segurança)
+    if(startBtn) startBtn.addEventListener('click', showMainContent);
+
+    // =====================================================================
+    //           ESTA É A FUNÇÃO QUE FOI ATUALIZADA
+    // =====================================================================
+    function switchTab(targetId) {
+        // Lógica de troca de abas (seu código original)
+        navLinks.forEach(l => l.classList.remove('active'));
+        const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+        if (activeLink) activeLink.classList.add('active');
+
+        mainContents.forEach(content => content.classList.remove('active'));
+        const activeContent = document.getElementById(targetId);
+        if (activeContent) activeContent.classList.add('active');
+
+        // --- LÓGICA DA TARJA DE ALERTA (ADICIONADA AQUI) ---
+        const banner = document.getElementById('critical-alert-banner');
+        if (banner) {
+            // Se a aba clicada for a do diagnóstico
+            if (targetId === 'diagnostico-arquitetura') {
+                clearTimeout(bannerTimer); // Limpa qualquer timer antigo
+                banner.classList.add('visible'); // Mostra a tarja
+
+                // Esconde a tarja após 3 segundos
+                bannerTimer = setTimeout(() => {
+                    banner.classList.remove('visible');
+                }, 3000); // 3 segundos
+            } else {
+                // Se for qualquer outra aba, garante que a tarja esteja escondida
+                banner.classList.remove('visible');
+            }
+        }
+        // --- FIM DA LÓGICA DA TARJA ---
+            // Lazy load charts and diagrams
+            if (targetId === 'uso-frequencia' && !document.getElementById('usageChart').hasAttribute('data-initialized')) {
+                initializeUsageChart();
+            }
+            if (targetId === 'diagnostico-arquitetura' && !architectureDiagramInitialized) {
+                initializeDbSchemaDiagram();
+                architectureDiagramInitialized = true;
+            }
+            if (targetId === 'proposta-redesign' && !redesignChartsInitialized) {
+                initializeRedesignCharts();
+                redesignChartsInitialized = true;
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (mainContainer.style.display === 'none') {
+                    showMainContent();
+                }
+                const targetId = link.dataset.target;
+                switchTab(targetId);
+                window.location.hash = targetId;
+            });
+        });
+
+        // Initialize based on hash or default
+        if (window.location.hash) {
+             const targetId = window.location.hash.substring(1);
+             showMainContent();
+             switchTab(targetId);
+        } else {
+             // Cover page is shown by default via CSS
+        }
+        
+        function initializeUsageChart() {
+            const ctxEl = document.getElementById('usageChart');
+            if (!ctxEl) return;
+            ctxEl.setAttribute('data-initialized', 'true');
+            if (usageChartInstance) usageChartInstance.destroy();
+            const viewersData = `ViewersCount,Date\n3,2025-06-09\n3,2025-06-10\n4,2025-06-11\n7,2025-06-12\n7,2025-06-13\n4,2025-06-14\n3,2025-06-15\n10,2025-06-16\n11,2025-06-17\n13,2025-06-18\n8,2025-06-19\n10,2025-06-20\n4,2025-06-21\n6,2025-06-22\n10,2025-06-23\n9,2025-06-24\n14,2025-06-25\n12,2025-06-26\n14,2025-06-27\n3,2025-06-28\n3,2025-06-29\n21,2025-06-30\n16,2025-07-01\n12,2025-07-02\n15,2025-07-03\n14,2025-07-04\n4,2025-07-05\n3,2025-07-06\n14,2025-07-07\n10,2025-07-08\n10,2025-07-09\n10,2025-07-10\n12,2025-07-11\n4,2025-07-12\n2,2025-07-13\n14,2025-07-14\n16,2025-07-15\n11,2025-07-16\n10,2025-07-17\n8,2025-07-18\n2,2025-07-19\n3,2025-07-20\n16,2025-07-21\n10,2025-07-22\n13,2025-07-23\n9,2025-07-24\n4,2025-07-25\n1,2025-07-27\n12,2025-07-28\n9,2025-07-29\n4,2025-07-30\n2,2025-07-31\n6,2025-08-01\n1,2025-08-02\n2,2025-08-03\n12,2025-08-04\n8,2025-08-05\n6,2025-08-06\n8,2025-08-07\n10,2025-08-08\n7,2025-08-11\n5,2025-08-12\n5,2025-08-13\n5,2025-08-14\n7,2025-08-15\n1,2025-08-16\n1,2025-08-17\n8,2025-08-18\n5,2025-08-19\n3,2025-08-20\n6,2025-08-21\n7,2025-08-22\n1,2025-08-24\n7,2025-08-25\n10,2025-08-26\n3,2025-08-27\n4,2025-08-28\n4,2025-08-29\n1,2025-08-30\n1,2025-08-31\n7,2025-09-01\n3,2025-09-02\n5,2025-09-03\n11,2025-09-04`;
+            const parsedData = viewersData.trim().split('\n').slice(1).map(row => {
+                const [count, date] = row.split(',');
+                return { date: new Date(date.trim()).toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'}), count: parseInt(count, 10) };
+            });
+            usageChartInstance = new Chart(ctxEl.getContext('2d'), {
+                type: 'line',
+                data: { labels: parsedData.map(d => d.date), datasets: [{ label: 'Visualizações Diárias', data: parsedData.map(d => d.count), borderColor: 'rgba(0, 45, 93, 0.8)', backgroundColor: 'rgba(0, 45, 93, 0.1)', fill: true, tension: 0.3, borderWidth: 2 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, title: { display: true, text: 'Nº de Visualizadores Únicos' } }, x: { title: { display: true, text: 'Data' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Visualizadores Únicos Diários (Jun-Set)', font: { size: 16 } } } }
+            });
+        }
+        
+        function initializeDbSchemaDiagram() {
+            const canvas = document.getElementById('schema-canvas');
+            const detailsPanel = document.getElementById('details-panel-arch');
+            if (!canvas || !detailsPanel) return;
+            canvas.innerHTML = '';
+            const tableData = {
+                'TICKET_CONTROL': { status: 'orange', left: 550, top: 450, columns: {'TicketId': 'int', 'BranchId': 'int', 'StatusTicketId': 'int', 'ProcessId': 'int', 'MovementTypeId': 'int', 'ModalId': 'int', 'SystemId':'int', 'VehiclePositionId':'int'}, leigo: 'Tabela central (Fato) que registra cada ticket. É o coração do modelo.', dba: ['Garantir que todas as chaves estrangeiras (ex: `BranchId`) possuam índices não clusterizados.'] },
+                'TICKET_GRADE': { status: 'red', left: 550, top: 20, columns: { 'StringFkID': 'varchar', 'GradeTypeId': 'int', 'GradePr': 'decimal', 'StatusId': 'int' }, leigo: 'A busca nesta tabela de classificação é um dos maiores gargalos, causando lentidão extrema.', dba: ['<strong>Ação Crítica:</strong> Criar um índice não clusterizado em `(StringFkID)` que inclua as colunas `GradeTypeId` e `GradePr` para eliminar a necessidade de `SORT` no plano de execução.', 'Adicionar filtro `WHERE StatusId = 2` diretamente na fonte (VIEW).'] },
+                'TICKET_MATERIAL': { status: 'red', left: 250, top: 230, columns: { 'StringFkID': 'varchar', 'MaterialId': 'int', 'DeleteDt': 'datetime' }, leigo: 'Similar à tabela de classificação, esta também causa lentidão por busca ineficiente.', dba: ['<strong>Ação Crítica:</strong> Criar um índice não clusterizado em `(StringFkID)` incluindo `MaterialId`.', 'O filtro `DeleteDt IS NULL` deve ser garantido na fonte.'] },
+                'MATERIAL': { status: 'red', left: 250, top: 20, columns: { 'MaterialId': 'int', 'MaterialName': 'varchar' }, leigo: 'O sistema estima 1 item e encontra quase 2 milhões, a principal causa de estouro de memória.', dba: ['<strong>Causa Raiz:</strong> Estimativa de Cardinalidade catastrófica (1 vs 1.9M).', '<strong>Ação de Maior Impacto:</strong> Executar `UPDATE STATISTICS [MATERIAL] WITH FULLSCAN` com urgência.'] },
+                'TICKET_WEIGHT': { status: 'orange', left: 850, top: 230, columns: {'StringKeyID': 'varchar', 'GrossWeightQt': 'bigint', 'TareWeightQt': 'bigint', 'GrossWeightTypeId': 'int'}, leigo: 'Registra as pesagens. O join com a tabela principal é um ponto de atenção.', dba: ['Garantir que a coluna de junção `StringKeyID` tenha um índice eficiente.'] },
+                'WEIGHT_TYPE': { status: 'green', left: 1150, top: 230, columns: {'ID': 'int', 'WeightTypeDescr': 'varchar'}, leigo: 'Tabela de apoio para tipos de pesagem. Sem problemas.', dba: ['Nenhuma ação necessária.'] },
+                'BRANCH': { status: 'orange', left: 550, top: 900, columns: { 'BranchId': 'int', 'CompanyId': 'int', 'StateId': 'int', 'RegionalId': 'int' }, leigo: 'O sistema não tem um bom "mapa" desta tabela, então ele "adivinha" o melhor caminho para buscar os dados, e geralmente erra.', dba: ['<strong>Causa Raiz:</strong> `ColumnsWithNoStatistics`.', '<strong>Ação:</strong> Criar ou atualizar as estatísticas para as colunas de `JOIN`.'] },
+                'STATE': { status: 'yellow', left: 250, top: 900, columns: { 'Id': 'int', 'CountryId': 'int', 'StateName': 'varchar' }, leigo: 'Pequeno erro de "adivinhação" do sistema. Sem grande impacto, mas mostra que a manutenção pode ser melhorada.', dba: ['<strong>Ação Preventiva:</strong> Atualizar as estatísticas da tabela.'] },
+                'COMPANY': { status: 'green', left: 850, top: 900, columns: { 'CompanyID': 'int', 'CompanyName': 'varchar' }, leigo: 'Tabela performando bem, sem gargalos.', dba: ['Nenhuma ação necessária.'] },
+                'REGIONAL_BUNGE': { status: 'green', left: 550, top: 1100, columns: {'ID': 'int', 'RegionalName': 'varchar'}, leigo: 'Tabela de apoio para regionais. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'COUNTRY': { status: 'green', left: 250, top: 1100, columns: {'ID': 'int', 'CountryShortName': 'varchar'}, leigo: 'Tabela de apoio para países. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'TICKET_STATUS': { status: 'green', left: 20, top: 450, columns: {'ID': 'int', 'StatusDescription': 'varchar'}, leigo: 'Tabela de apoio para status. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'PROCESS': { status: 'green', left: 20, top: 580, columns: {'ID': 'int', 'ProcessName': 'varchar'}, leigo: 'Tabela de apoio para processos. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'MOVEMENT_TYPE': { status: 'green', left: 20, top: 710, columns: {'ID': 'int', 'MovementTypeDs': 'varchar'}, leigo: 'Tabela de apoio para tipo de movimento. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'MODAL_TYPE': { status: 'green', left: 1150, top: 580, columns: {'ID': 'int', 'ModalTypeDescr': 'varchar'}, leigo: 'Tabela de apoio para tipo de modal. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'VEHICLE_POSITION': { status: 'green', left: 1150, top: 450, columns: {'ID': 'int', 'PositionDescription': 'varchar'}, leigo: 'Tabela de apoio para posição do veículo. Sem problemas.', dba: ['Nenhuma ação necessária.']},
+                'ORIGIN_SYSTEM': { status: 'green', left: 1150, top: 710, columns: {'ID': 'int', 'SystemName': 'varchar'}, leigo: 'Tabela de apoio para sistema de origem. Sem problemas.', dba: ['Nenhuma ação necessária.']}
+            };
+            const connections = [ { from: 'TICKET_GRADE', to: 'TICKET_MATERIAL' }, { from: 'TICKET_MATERIAL', to: 'TICKET_CONTROL' }, { from: 'MATERIAL', to: 'TICKET_MATERIAL' }, { from: 'TICKET_WEIGHT', to: 'TICKET_CONTROL'}, { from: 'WEIGHT_TYPE', to: 'TICKET_WEIGHT' }, { from: 'BRANCH', to: 'TICKET_CONTROL'}, { from: 'COMPANY', to: 'BRANCH' }, { from: 'STATE', to: 'BRANCH' }, { from: 'COUNTRY', to: 'STATE' }, { from: 'REGIONAL_BUNGE', to: 'BRANCH'}, { from: 'TICKET_STATUS', to: 'TICKET_CONTROL' }, { from: 'PROCESS', to: 'TICKET_CONTROL'}, { from: 'MOVEMENT_TYPE', to: 'TICKET_CONTROL'}, { from: 'VEHICLE_POSITION', to: 'TICKET_CONTROL'}, { from: 'MODAL_TYPE', to: 'TICKET_CONTROL'}, { from: 'ORIGIN_SYSTEM', to: 'TICKET_CONTROL'} ];
+            const statusColors = { red: '#dc3545', orange: '#fd7e14', yellow: '#ffc107', green: '#28a745' };
+            const statusLabels = { red: 'Crítico', orange: 'Atenção', yellow: 'Melhorável', green: 'OK' };
+            Object.keys(tableData).forEach(id => {
+                const data = tableData[id];
+                const tableEl = document.createElement('div');
+                tableEl.id = `table-${id}`;
+                tableEl.className = 'db-table';
+                tableEl.style.left = `${data.left}px`;
+                tableEl.style.top = `${data.top}px`;
+                let columnsHtml = Object.entries(data.columns).map(([name, type]) => `<div class="column"><span>${name}</span><span class="type">${type}</span></div>`).join('');
+                tableEl.innerHTML = `<div class="header" style="background-color: ${statusColors[data.status]};">${id}</div><div class="columns">${columnsHtml}</div>`;
+                tableEl.addEventListener('click', () => {
+                    document.querySelectorAll('.db-table').forEach(el => { el.style.borderColor = '#adb5bd'; el.style.zIndex = '10'; });
+                    tableEl.style.borderColor = statusColors[data.status];
+                    tableEl.style.zIndex = '101';
+                    const dbaRecommendationsHtml = data.dba.map(rec => `<li>${rec.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</li>`).join('');
+                    detailsPanel.innerHTML = `<div class="card-header" style="background-color:${statusColors[data.status]}; color:white;"><i class="fa-solid fa-magnifying-glass-chart"></i>Análise de: ${id}</div><div class="card-body"><h4 style="margin-top:0; color:${statusColors[data.status]};"><i class="fa-solid fa-flag"></i> Status: ${statusLabels[data.status]}</h4><hr style="border:0; border-top:1px solid var(--border-color); margin: 15px 0;"><div><strong><i class="fa fa-briefcase"></i> Impacto no Negócio (visão simplificada):</strong><p style="font-size:14px; margin-top:5px; padding-left:10px; border-left: 3px solid #ccc;">${data.leigo}</p></div><div style="margin-top:20px;"><strong><i class="fa fa-database"></i> Recomendações Técnicas (para equipe DBA):</strong><ul style="font-size:13px; margin-top:10px; padding-left:20px; list-style-type:'\\25BA  ';">${dbaRecommendationsHtml}</ul></div></div>`;
+                });
+                canvas.appendChild(tableEl);
+            });
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.style.position = 'absolute'; svg.style.top = 0; svg.style.left = 0; svg.style.width = '100%'; svg.style.height = '100%'; svg.style.pointerEvents = 'none';
+            svg.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#555" /></marker></defs>';
+            connections.forEach(conn => {
+                const fromEl = document.getElementById(`table-${conn.from}`); const toEl = document.getElementById(`table-${conn.to}`);
+                const fromX = fromEl.offsetLeft + fromEl.offsetWidth / 2; const fromY = fromEl.offsetTop + fromEl.offsetHeight / 2;
+                const toX = toEl.offsetLeft + toEl.offsetWidth / 2; const toY = toEl.offsetTop + toEl.offsetHeight / 2;
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromX); line.setAttribute('y1', fromY); line.setAttribute('x2', toX); line.setAttribute('y2', toY);
+                line.setAttribute('stroke', '#555'); line.setAttribute('stroke-width', '2'); line.setAttribute('marker-end', 'url(#arrowhead)');
+                svg.appendChild(line);
+            });
+            canvas.prepend(svg);
+        }
+
+        function initializeRedesignCharts() {
+            if (volumeRegionalChart) volumeRegionalChart.destroy();
+            const ctx1 = document.getElementById('volumeRegionalChart').getContext('2d');
+            volumeRegionalChart = new Chart(ctx1, { type: 'bar', data: { labels: ['MT1', 'SP', 'PR', 'BA', 'MT2'], datasets: [{ label: 'Volume Recebido (K Ton)', data: [68.6, 102.8, 95.4, 68.2, 55.0], backgroundColor: 'rgba(0, 45, 93, 0.8)', borderColor: 'rgba(0, 45, 93, 1)', borderWidth: 1 }] }, options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { title: { display: true, text: 'Volume (K Ton)' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Volume por Regional' } } } });
+            if (fluxoDiarioChart) fluxoDiarioChart.destroy();
+            const ctx2 = document.getElementById('fluxoDiarioChart').getContext('2d');
+            fluxoDiarioChart = new Chart(ctx2, { type: 'line', data: { labels: ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00'], datasets: [{ label: 'Veículos na Fila', data: [5, 12, 8, 15, 11, 4, 2], borderColor: 'rgba(12, 188, 140, 1)', backgroundColor: 'rgba(12, 188, 140, 0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: 'Nº de Veículos' } } }, plugins: { legend: { display: false }, title: { display: true, text: 'Fluxo de Veículos na Fila (Hoje)' } } } });
+        }
+    });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+
+</div></body></html>

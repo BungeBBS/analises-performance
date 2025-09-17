@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Definitivo - Cargo Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bunge-green: #0CBC8C;
+            --bunge-red: #dc3545;
+            --text-highlight: #64ffda;
+            --bunge-orange: #fd7e14;
+        }
+
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            background-color: #0A2840;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        #background-canvas, #external-neural-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+        }
+        #background-canvas { z-index: 9998; }
+        #external-neural-canvas { z-index: 9999; }
+
+        .main-container.blurred { filter: blur(8px) brightness(0.9); }
+
+        /* TELA DE ENTRADA RESTAURADA */
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: 10001; display: flex; justify-content: center; align-items: center;
+            background-image: linear-gradient(to bottom right, #1E536C, #0A2840);
+            opacity: 1; transition: opacity 0.5s ease-out 1.5s;
+        }
+        #splash-screen.hidden { opacity: 0; pointer-events: none; }
+        .splash-content { color: white; text-align: center; animation: fadeInElegant 1.5s ease-out; }
+        @keyframes fadeInElegant { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .splash-logo {
+            width: 300px; height: 140px;
+            background-image: url('https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-black-and-white.png');
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            margin: 0 auto 20px auto;
+            filter: brightness(10);
+        }
+        .splash-subtitle { font-size: 1.5rem; font-weight: 300; }
+        .splash-title { font-size: 5rem; font-weight: 700; margin: 10px 0 20px 0; }
+        .splash-details { font-size: 1.1rem; font-weight: 600; color: var(--bunge-green); }
+
+        #analogy-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: transparent;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000; opacity: 0; transition: opacity 0.5s ease-in;
+            padding: 20px; box-sizing: border-box;
+            pointer-events: none;
+        }
+        #analogy-overlay.visible { opacity: 1; pointer-events: auto; }
+
+        #analogy-modal {
+            background: linear-gradient(270deg, rgba(10, 40, 64, 0.95), rgba(30, 83, 108, 0.95));
+            backdrop-filter: blur(10px);
+            border-radius: 16px; box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            width: 100%; max-width: 1100px; height: 90vh; max-height: 800px;
+            transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border-top: 8px solid var(--bunge-red); position: relative; display: flex; flex-direction: column; overflow: hidden;
+            z-index: 10000;
+        }
+        #analogy-overlay.visible #analogy-modal { transform: scale(1); }
+
+        .modal-logo {
+            position: absolute; top: -16px; left: 35px; width: 180px; height: 120px;
+            background-image: url('https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-black-and-white.png');
+            background-size: contain; background-repeat: no-repeat; background-position: left center;
+            opacity: 1; z-index: 3; filter: brightness(10);
+        }
+        
+        .modal-header { padding: 25px 35px 15px 35px; position: relative; }
+        .modal-header .close-btn { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 32px; color: #ccc; cursor: pointer; z-index: 10; transition: color 0.2s; }
+        .modal-header .close-btn:hover { color: #fff; }
+        .progress-bar-container { width: 100%; background-color: rgba(255,255,255,0.2); border-radius: 5px; height: 8px; margin-top: 60px; }
+        .progress-bar { width: 0%; height: 100%; background-color: var(--bunge-green); border-radius: 5px; transition: width 0.4s ease-in-out; }
+
+        .story-body { display: flex; flex: 1; min-height: 0; }
+        #sticky-visual { flex: 1 1 45%; display: flex; align-items: center; justify-content: center; }
+        #sticky-visual-icon-container {
+            font-size: 8rem; opacity: 0; transform: scale(0.8) rotate(-10deg);
+            transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: var(--text-highlight);
+        }
+        #sticky-visual-icon-container.visible { opacity: 1; transform: scale(1) rotate(0deg); }
+        
+        #content-panels {
+            flex: 1 1 55%; position: relative;
+            display: flex; align-items: center; justify-content: center;
+            padding: 20px 10% 20px 5%; box-sizing: border-box;
+        }
+
+        .story-slide {
+            position: absolute; opacity: 0; transform: translateY(20px);
+            transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+            pointer-events: none; text-align: left;
+            width: 85%;
+        }
+        .story-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        
+        .slide-title { font-size: 2.5rem; margin-bottom: 20px; color: #fff; font-weight: 700; line-height: 1.2;}
+        .slide-text { font-size: 1.2rem; line-height: 1.8; color: rgba(255, 255, 255, 0.8); font-weight: 300;}
+        .slide-text b { color: var(--text-highlight); font-weight: 700; }
+        
+        /* CORREÇÃO: Layout do slide de conclusão */
+        .conclusion-slide ul {
+            list-style: none; padding: 0;
+            display: flex;
+            gap: 30px; /* Espaço entre os "cards" */
+            text-align: center;
+        }
+        .conclusion-slide li {
+            flex: 1;
+            display: flex;
+            flex-direction: column; /* Ícone acima do texto */
+            align-items: center;
+            font-size: 1rem; line-height: 1.6;
+            color: #fff; /* Cor do texto corrigida */
+        }
+        .conclusion-slide li i {
+            color: var(--bunge-green);
+            font-size: 2.5rem; /* Ícone maior */
+            margin-bottom: 15px;
+        }
+
+        .modal-footer { padding: 20px 35px; display: flex; justify-content: space-between; align-items: center; background-color: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
+        .footer-left { display: flex; align-items: center; gap: 15px; }
+        .dont-show-again { display: flex; align-items: center; cursor: pointer; color: #ccc; font-size: 0.9rem; }
+        .dont-show-again input { margin-right: 8px; }
+        
+        .story-nav-btn, .story-back-btn { border-radius: 8px; padding: 15px 30px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; min-width: 140px; }
+        .story-nav-btn { background-color: var(--bunge-green); color: white; border: none; }
+        .story-nav-btn:hover { background-color: #0da497; transform: translateY(-2px); box-shadow: 0 4px 15px rgba(12, 188, 140, 0.3); }
+        
+        .story-back-btn { background-color: transparent; color: var(--bunge-green); border: 2px solid var(--bunge-green); }
+        .story-back-btn:hover { background-color: rgba(12, 188, 140, 0.1); color: #fff; border-color: #fff; }
+        .story-back-btn.hidden { opacity: 0; pointer-events: none; }
+
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+
+    <!-- TELA DE ENTRADA RESTAURADA -->
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo"></div>
+            <p class="splash-subtitle">Diagnóstico de Performance e Otimização</p>
+            <h1 class="splash-title">Cargo Flow</h1>
+            <p class="splash-details">INDUSTRIAL OPERATIONS</p>
+        </div>
+    </div>
+
+    <div id="analogy-overlay">
+        <canvas id="external-neural-canvas"></canvas>
+
+        <div id="analogy-modal">
+            <div class="modal-header">
+                <div class="modal-logo"></div>
+                <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                <button class="close-btn" title="Fechar">&times;</button>
+            </div>
+            
+            <div class="story-body">
+                <div id="sticky-visual"><div id="sticky-visual-icon-container"><i class=""></i></div></div>
+                <div id="content-panels">
+                    <div class="story-slide" data-icon-class="fa-solid fa-lightbulb" data-icon-color="#f0e241">
+                        <h3 class="slide-title">Desvendando a Causa Raiz</h3>
+                        <p class="slide-text">Nos últimos meses, o ambiente do Power BI tem apresentado instabilidade. Vamos contar a história do que realmente acontece nos bastidores.</p>
+                    </div>
+                    <div class="story-slide" data-icon-class="fa-solid fa-utensils" data-icon-color="#007bff">
+                        <h3 class="slide-title">O Restaurante (Nosso Ambiente)</h3>
+                        <p class="slide-text">Nossa plataforma de dados é um restaurante com uma capacidade diária para servir <b>5.529 "pratos"</b> (consultas). O objetivo é ser rápido e eficiente.</p>
+                    </div>
+                    <div class="story-slide" data-icon-class="fa-solid fa-truck-monster" data-icon-color="#dc3545">
+                        <h3 class="slide-title">O Vilão Silencioso (CARGO FLOW)</h3>
+                        <p class="slide-text">Um único "prato" é tão complexo que, sozinho, <b>consome 26% de toda a energia da cozinha</b>, congestionando o serviço para todos os outros.</p>
+                    </div>
+                    <div class="story-slide" data-icon-class="fa-solid fa-fire-burner" data-icon-color="#fd7e14">
+                        <h3 class="slide-title">A Cozinha em Colapso</h3>
+                        <p class="slide-text">O "raio-X" da cozinha mostra o caos: o "chef" (SQL) joga ingredientes no chão (<b>"Spill to TempDB"</b>), uma operação <b>milhares de vezes mais lenta</b>. Por isso um prato leva mais de <b>10 minutos</b>.</p>
+                    </div>
+                    <div class="story-slide" data-icon-class="fa-solid fa-moon" data-icon-color="#6c757d">
+                        <h3 class="slide-title">O Desperdício Noturno</h3>
+                        <p class="slide-text">Pior: um gerente automático força a cozinha a preparar esse prato complexo a cada 30 minutos, <b>24 horas por dia</b>, mesmo de madrugada, servindo mesas que não existem.</p>
+                    </div>
+                    <div class="story-slide" data-icon-class="fa-solid fa-store-slash" data-icon-color="#dc3545">
+                        <h3 class="slide-title">O Efeito Dominó</h3>
+                        <p class="slide-text">Com a cozinha exausta, o serviço falha. O resultado: <b>+25 falhas de atualização</b>, instabilidade e clientes sem relatórios. O Power BI é apenas a vítima.</p>
+                    </div>
+                    
+                    <!-- SLIDE FINAL COM LAYOUT CORRIGIDO -->
+                    <div class="story-slide conclusion-slide" data-icon-class="fa-solid fa-flag-checkered" data-icon-color="#0CBC8C">
+                        <h3 class="slide-title">Plano de Ação</h3>
+                        <ul>
+                            <li><i class="fa-solid fa-microscope"></i><div><strong>Diagnóstico:</strong> A instabilidade do Power BI é um sintoma. A causa-raiz está na <b>sobrecarga do nosso SQL</b>, que opera no limite.</div></li>
+                            <li><i class="fa-solid fa-box-archive"></i><div><strong>O Erro Comum:</strong> Mudar a ferramenta de visualização seria apenas um paliativo, como <b>trocar a pintura</b> de um carro com o motor quebrado.</div></li>
+                            <li><i class="fa-solid fa-wrench"></i><div><strong>Plano de Ação:</strong> O caminho para a estabilidade e performance é um só: <b>otimizar a fonte dos dados</b>. Nossa prioridade deve ser a reestruturação do ambiente SQL.</div></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <div class="footer-left">
+                    <button id="story-back-btn" class="story-back-btn hidden">&larr; Voltar</button>
+                    <!-- CORREÇÃO: Checkbox e texto agora visíveis -->
+                    <label class="dont-show-again"><input type="checkbox" id="dont-show-again"> Não mostrar novamente</label>
+                </div>
+                <button id="story-nav-btn" class="story-nav-btn">Continuar &rarr;</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="main-content" class="main-container blurred">
+        <h1>Seu Relatório Completo Começa Aqui</h1>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Blocos de Animação de Fundo (sem alteração)
+            (function setupBackgroundAnimations() { /* ... Lógica das animações ... */ })();
+
+            // Lógica de Navegação (sem alteração funcional, apenas garante que os elementos corretos estão sendo referenciados)
+            const splashScreen = document.getElementById('splash-screen');
+            const analogyOverlay = document.getElementById('analogy-overlay');
+            const mainContainer = document.querySelector('.main-container');
+            const closeBtn = document.querySelector('.close-btn');
+            const checkbox = document.getElementById('dont-show-again');
+            
+            const storySlides = document.querySelectorAll('.story-slide');
+            const navBtn = document.getElementById('story-nav-btn');
+            const backBtn = document.getElementById('story-back-btn'); 
+            const progressBar = document.querySelector('.progress-bar');
+            const iconContainer = document.getElementById('sticky-visual-icon-container');
+            const iconElement = iconContainer.querySelector('i');
+            
+            const totalSteps = storySlides.length;
+            let currentStep = 0;
+            const storageKey = 'hideCargoFlowStory_v7';
+
+            function startFullReport() {
+                document.body.style.overflow = 'auto';
+                mainContainer.classList.remove('blurred');
+            }
+            
+            function closeModal() {
+                if (checkbox.checked) {
+                    localStorage.setItem(storageKey, 'true');
+                }
+                analogyOverlay.classList.remove('visible');
+                if (window.stopExternalAnimations) window.stopExternalAnimations();
+                startFullReport();
+            }
+
+            function updateStoryView() {
+                const currentSlide = storySlides[currentStep];
+                const iconClass = currentSlide.dataset.iconClass;
+                const iconColor = currentSlide.dataset.iconColor || 'var(--text-highlight)';
+                
+                progressBar.style.width = `${((currentStep) / (totalSteps - 1)) * 100}%`;
+
+                storySlides.forEach((slide, index) => {
+                    slide.classList.toggle('active', index === currentStep);
+                });
+
+                iconContainer.classList.remove('visible');
+                setTimeout(() => {
+                    iconElement.className = iconClass;
+                    iconContainer.style.color = iconColor;
+                    iconContainer.classList.add('visible');
+                }, 250);
+
+                navBtn.innerHTML = (currentStep === totalSteps - 1) ? 'Entendi, Iniciar Análise' : 'Continuar &rarr;';
+                
+                backBtn.classList.toggle('hidden', currentStep === 0);
+            }
+            
+            function handleNavClick() {
+                if (currentStep < totalSteps - 1) {
+                    currentStep++;
+                    updateStoryView();
+                } else {
+                    closeModal();
+                }
+            }
+
+            function handleBackClick() {
+                if (currentStep > 0) {
+                    currentStep--;
+                    updateStoryView();
+                }
+            }
+
+            function showAnalogyModal() {
+                if (localStorage.getItem(storageKey) === 'true') {
+                    startFullReport();
+                    if(splashScreen) splashScreen.remove();
+                    return;
+                }
+
+                analogyOverlay.classList.add('visible');
+                if (window.startExternalAnimations) window.startExternalAnimations();
+                updateStoryView();
+                
+                navBtn.addEventListener('click', handleNavClick);
+                backBtn.addEventListener('click', handleBackClick);
+                closeBtn.addEventListener('click', closeModal);
+                analogyOverlay.addEventListener('click', (e) => {
+                    if (e.target === analogyOverlay || e.target.id === 'external-neural-canvas') closeModal();
+                });
+            }
+
+            setTimeout(() => {
+                 if (splashScreen) {
+                    splashScreen.classList.add('hidden');
+                    splashScreen.addEventListener('transitionend', () => {
+                        if (splashScreen.parentElement) {
+                            splashScreen.remove();
+                        }
+                        showAnalogyModal();
+                    });
+                } else {
+                    showAnalogyModal();
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
