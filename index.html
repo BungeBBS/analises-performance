@@ -3,245 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal de Análises de Performance - Bunge</title>
+    <title>Otimização de Projetos de BI - Bunge</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     
     <style>
         :root {
-            --bunge-blue: #002d5d;
             --bunge-green: #0CBC8C;
             --text-highlight: #64ffda;
-            --bg-dark: #0A2840;
-            --text-light: rgba(255, 255, 255, 0.7);
+            --text-danger: #ff6b6b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--bg-dark);
-            color: #fff;
-            margin: 0;
-            overflow: hidden;
+            font-family: 'Roboto', sans-serif; color: #fff; margin: 0;
+            background: linear-gradient(-45deg, #0a2840, #1e536c, #0d3b36, #0a2840);
+            background-size: 400% 400%;
+            animation: gradientWave 25s ease infinite;
         }
+        @keyframes gradientWave { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        #background-canvas, #external-neural-canvas {
-            position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 0;
-        }
-        #external-neural-canvas { z-index: 1; }
+        #external-neural-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.6; }
 
         .portal-wrapper {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-            text-align: center;
+            position: relative; z-index: 2; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; min-height: 100vh;
+            padding: 40px 20px; text-align: center;
         }
 
+        .portal-header { visibility: hidden; } /* Escondido para animar com GSAP */
         .portal-logo {
-            width: 250px;
-            height: 120px;
+            width: 250px; height: 110px;
             background-image: url('https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-black-and-white.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            margin-bottom: 20px;
-            filter: brightness(10);
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            margin: 0 auto 25px auto; filter: brightness(10) opacity(0.9);
         }
+        .portal-header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
+        .portal-header p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); font-weight: 300; max-width: 700px; margin: 0 auto 40px auto; line-height: 1.6; }
 
-        /* --- Vistas do Portal --- */
-        #initial-view, #dashboard-view {
-            width: 100%;
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-
-        #initial-view h1, #dashboard-view h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
+        .ranking-table-container { visibility: hidden; /* Escondido para animar com GSAP */ width: 100%; max-width: 1300px; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(8px); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .ranking-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .ranking-table th { padding: 15px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.6); border-bottom: 2px solid rgba(255, 255, 255, 0.2); }
+        .ranking-table td { padding: 18px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); vertical-align: middle; }
+        .ranking-table tr:last-child td { border-bottom: none; }
         
-        #initial-view .subtitle, #dashboard-view .subtitle {
-            font-size: 1.2rem;
-            color: var(--text-light);
-            font-weight: 300;
-            margin-bottom: 40px;
-            max-width: 600px;
-        }
-
-        .hero-button {
-            display: inline-block;
-            background-color: var(--bunge-green);
-            color: white;
-            padding: 20px 50px;
-            font-size: 1.3rem;
-            font-weight: 700;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(12, 188, 140, 0.4);
-            border: none;
-            cursor: pointer;
-        }
-        .hero-button:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(12, 188, 140, 0.5);
-        }
-
-        /* --- Estilo do Dashboard (Segunda Tela) --- */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .project-card {
-            background: rgba(30, 83, 108, 0.6);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 30px;
-            text-align: left;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-decoration: none;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-        .project-card:hover {
-            transform: translateY(-8px);
-            background: rgba(30, 83, 108, 0.9);
-            border-color: var(--text-highlight);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .card-icon {
-            font-size: 2.5rem;
-            color: var(--text-highlight);
-            margin-bottom: 15px;
-        }
-
-        .project-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .project-card p {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text-light);
-        }
-
-        /* Classe para esconder as vistas */
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-            transform: translateY(20px);
-            position: absolute; /* Evita que ocupe espaço quando escondido */
-        }
+        .project-name { font-weight: 500; font-size: 1rem; }
+        .observation-critical { color: var(--text-danger); font-weight: 500; }
+        .action-button { display: inline-block; background-color: var(--bunge-green); color: white; padding: 10px 20px; font-size: 0.9rem; text-decoration: none; border-radius: 6px; transition: all 0.3s ease; white-space: nowrap; }
+        .action-button.disabled { background-color: #6c757d; cursor: not-allowed; opacity: 0.7; }
+        .action-button:not(.disabled):hover { background-color: var(--text-highlight); color: #0A2840; }
         
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            #initial-view h1, #dashboard-view h1 {
-                font-size: 2rem;
-            }
+        /* Nova Assinatura */
+        footer {
+            visibility: hidden; /* Escondido para animar com GSAP */
+            margin-top: 40px; text-align: center; font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.6);
         }
-
+        .footer-content { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .footer-text span { display: block; }
+        .footer-name { font-weight: 700; color: #fff; }
+        .footer-linkedin a { color: var(--text-highlight); font-size: 1.8rem; transition: color 0.3s, transform 0.3s; }
+        .footer-linkedin a:hover { color: #fff; transform: scale(1.1); }
+        
+        @media (max-width: 1200px) { .ranking-table-container { padding: 15px; } .ranking-table td, .ranking-table th { font-size: 0.9rem; } }
+        @media (max-width: 768px) { .portal-header h1 { font-size: 1.8rem; } .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) { display: none; } /* Esconde coluna de uso em telas menores */ }
     </style>
 </head>
 <body>
-    <!-- Animações de Fundo -->
-    <canvas id="background-canvas"></canvas>
     <canvas id="external-neural-canvas"></canvas>
 
     <div class="portal-wrapper">
-        <div class="portal-logo"></div>
+        <header class="portal-header">
+            <div class="portal-logo"></div>
+            <h1>Otimização de Projetos de BI</h1>
+            <p>Nossa Plataforma de Dados como um Ecossistema. Para entender onde nosso investimento em capacidade está sendo alocado, podemos tratar o consumo da plataforma como um portfólio. A tabela abaixo detalha os 10 maiores "consumidores de energia" do nosso ecossistema.</p>
+        </header>
 
-        <!-- TELA 1: Entrada Principal -->
-        <div id="initial-view">
-            <h1>Portal de Análises de Performance</h1>
-            <p class="subtitle">Projetos e Dashboards de Otimização para Industrial Operations</p>
-            <button id="access-button" class="hero-button">Acessar Análises de Performance</button>
+        <div class="ranking-table-container">
+            <table class="ranking-table">
+                <thead>
+                    <tr>
+                        <th>Ranking</th>
+                        <th>Item / Nome do Projeto</th>
+                        <th>Uso (% do Total da Capacidade)</th>
+                        <th>Observação Estratégica</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1º</td><td><div class="project-name">CARGO FLOW FULL (Dataflow)</div></td><td>26.0%</td><td>De longe o maior consumidor. Sua otimização é crítica.</td><td><a href="diag_cargoflow_introducao.html" class="action-button">Ver Análise</a></td></tr>
+                    <tr><td>2º</td><td><div class="project-name">DSS-B-18-10-CSDataflowBSS-BUGR</div></td><td>9.9%</td><td><span class="observation-critical">Alto consumo e principal causador de sobrecarga.</span></td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>3º</td><td><div class="project-name">RTDSample Vessel Management</div></td><td>6.1%</td><td>Consumo significativo para um único sistema.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>4º</td><td><div class="project-name">Mega Finance Controls Dashboard</div></td><td>5.8%</td><td>Alto consumo para um número moderado de usuários.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>5º</td><td><div class="project-name">Monitoring Eventhouse</div></td><td>4.0%</td><td>Outro sistema de monitoramento com consumo relevante.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>6º</td><td><div class="project-name">Gestão a Vista Snow Versão 2.0</div></td><td>3.8%</td><td>Dataset grande (7.8 GB) com consumo considerável.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>7º</td><td><div class="project-name">RTDSample (BGBVT Integration)</div></td><td>3.6%</td><td>Terceiro item de monitoramento na lista.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>8º</td><td><div class="project-name">O DEVOPS</div></td><td>3.1%</td><td>Consumo relevante para um relatório interno de TI.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>9º</td><td><div class="project-name">Prioritized Improvements</div></td><td>3.1%</td><td>Custo similar ao anterior, dentro do mesmo projeto.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <tr><td>10º</td><td><div class="project-name">Prioritized Enhancements</div></td><td>3.0%</td><td>Terceiro item do projeto "Business Technology".</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <!-- TELA 2: Dashboard com Opções -->
-        <div id="dashboard-view" class="hidden">
-            <h1>Dashboard de Análises</h1>
-            <p class="subtitle">Selecione um projeto para visualizar o diagnóstico detalhado.</p>
-            <div class="dashboard-grid">
-                
-                <!-- Card 1: Cargo Flow -->
-                <a href="diag_cargoflow_introducao.html" class="project-card">
-                    <div class="card-icon"><i class="fa-solid fa-truck-fast"></i></div>
-                    <h3>Cargo Flow</h3>
-                    <p>Análise completa de performance, identificação de gargalos e plano de ação estratégico.</p>
-                </a>
-                
-                <!-- Card 2: Customer Services -->
-                <a href="#" class="project-card">
-                    <div class="card-icon"><i class="fa-solid fa-headset"></i></div>
-                    <h3>Customer Services</h3>
-                    <p>Análise de SLAs, tempos de resposta e satisfação do cliente para otimização de processos.</p>
-                </a>
-
-                <!-- Card 3: Gestão à Vista -->
-                <a href="#" class="project-card">
-                    <div class="card-icon"><i class="fa-solid fa-desktop"></i></div>
-                    <h3>Gestão à Vista</h3>
-                    <p>Desenvolvimento de painéis gerenciais com KPIs em tempo real para tomada de decisão.</p>
-                </a>
-
-                <!-- Card 4: Pagamentos no Prazo -->
-                <a href="#" class="project-card">
-                    <div class="card-icon"><i class="fa-solid fa-calendar-check"></i></div>
-                    <h3>Pagamentos no Prazo</h3>
-                    <p>Diagnóstico de fluxo de pagamentos, identificando atrasos e otimizando o ciclo financeiro.</p>
-                </a>
-
+        
+        <footer>
+            <div class="footer-content">
+                <div class="footer-text">
+                    <span class="footer-name">Willian Martins de Oliveira</span>
+                    <span>Sustainable Excellence | Senior Data Analyst | BBS Gaspar</span>
+                </div>
+                <div class="footer-linkedin">
+                    <a href="https://www.linkedin.com/in/willianmartinoliver/" target="_blank" title="LinkedIn Profile">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                </div>
             </div>
-        </div>
+        </footer>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-
-            // --- Lógica das Animações de Fundo (sem alterações) ---
-            (function setupBackgroundAnimations() {
-                // Efeito Trigo
-                const bgCanvas = document.getElementById('background-canvas');
-                if (bgCanvas) { (()=>{const e=bgCanvas.getContext("2d");let t=[],n=0;function a(){bgCanvas.width=window.innerWidth,bgCanvas.height=window.innerHeight,t=[];for(let n=0;n<200;n++)t.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,length:20*Math.random()+10,speed:.3*Math.random()+.1,offset:2*Math.random()*Math.PI})}function i(){e.clearRect(0,0,bgCanvas.width,bgCanvas.height),e.strokeStyle="rgba(100, 255, 218, 0.15)",e.lineWidth=1,n++,t.forEach(t=>{t.y-=t.speed,t.y<-t.length&&(t.y=bgCanvas.height,t.x=Math.random()*bgCanvas.width);const a=2*Math.sin(t.offset+.02*n);e.beginPath(),e.moveTo(t.x+a,t.y),e.lineTo(t.x+a,t.y+t.length),e.stroke()}),requestAnimationFrame(i)}window.addEventListener("resize",a),a(),i()})(); }
-
-                // Rede Neural Externa
-                const extCanvas = document.getElementById('external-neural-canvas');
-                if (extCanvas) { (()=>{const e=extCanvas.getContext("2d");let t,n;function a(){extCanvas.width=window.innerWidth,extCanvas.height=window.innerHeight,function(){t=[];let n=(extCanvas.width*extCanvas.height)/12e3;for(let a=0;a<n;a++){let n=2*Math.random()+1,i=Math.random()*extCanvas.width,o=.6*Math.random()-.3,c=.6*Math.random()-.3;t.push(new s(i,Math.random()*extCanvas.height,o,c,n,"rgba(100, 255, 218, 0.5)"))}}()}window.addEventListener("resize",a);class s{constructor(t,n,a,i,o,c){this.x=t,this.y=n,this.dirX=a,this.dirY=i,this.size=o,this.color=c}draw(){e.beginPath(),e.arc(this.x,this.y,this.size,0,2*Math.PI,!1),e.fillStyle=this.color,e.fill()}update(){this.x>extCanvas.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>extCanvas.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const i=()=>{let n=180;for(let a=0;a<t.length;a++)for(let o=a+1;o<t.length;o++){let c=Math.sqrt(Math.pow(t[a].x-t[o].x,2)+Math.pow(t[a].y-t[o].y,2));c<n&&(e.strokeStyle=`rgba(100, 255, 218, ${.4*Math.pow(1-c/n,2)})`,e.lineWidth=1,e.beginPath(),e.moveTo(t[a].x,t[a].y),e.lineTo(t[o].x,t[o].y),e.stroke())}},o=()=>{n=requestAnimationFrame(o),e.clearRect(0,0,extCanvas.width,extCanvas.height),t.forEach(e=>{e.update(),e.draw()}),i()};a(),o()})(); }
-            })();
-
-            // --- Lógica da Transição de Tela ---
-            const initialView = document.getElementById('initial-view');
-            const dashboardView = document.getElementById('dashboard-view');
-            const accessButton = document.getElementById('access-button');
-
-            accessButton.addEventListener('click', () => {
-                // Esconde a primeira tela
-                initialView.classList.add('hidden');
-
-                // Após a animação de saída, mostra a segunda tela
-                setTimeout(() => {
-                    dashboardView.classList.remove('hidden');
-                }, 300); // O tempo deve ser um pouco menor que a transição do CSS
-            });
-
+            // Animação da Rede Neural
+            (function setupExternalNeuralNetwork(){const t=document.getElementById("external-neural-canvas");if(!t)return;const a=t.getContext("2d");let e,n;function i(){t.width=window.innerWidth,t.height=window.innerHeight,function(){e=[];let n=(t.width*t.height)/15e3;for(let i=0;i<n;i++){let n=2*Math.random()+.5,o=Math.random()*t.width,s=.4*Math.random()-.2,d=.4*Math.random()-.2;e.push(new l(o,Math.random()*t.height,s,d,n,"rgba(100, 255, 218, 0.7)"))}}()}window.addEventListener("resize",i);class l{constructor(t,e,n,i,o,s){this.x=t,this.y=e,this.dirX=n,this.dirY=i,this.size=o,this.color=s}draw(){a.beginPath(),a.arc(this.x,this.y,this.size,0,2*Math.PI,!1),a.fillStyle=this.color,a.fill()}update(){this.x>t.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>t.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const o=()=>{let n=200;for(let i=0;i<e.length;i++)for(let l=i+1;l<e.length;l++){let s=Math.sqrt(Math.pow(e[i].x-e[l].x,2)+Math.pow(e[i].y-e[l].y,2));s<n&&(a.strokeStyle=`rgba(100, 255, 218, ${.5*Math.pow(1-s/n,2)})`,a.lineWidth=.8,a.beginPath(),a.moveTo(e[i].x,e[i].y),a.lineTo(e[l].x,e[l].y),a.stroke())}},s=()=>{n=requestAnimationFrame(s),a.clearRect(0,0,t.width,t.height),e.forEach(t=>{t.update(),t.draw()}),o()};i(),s()})();
+            
+            // Animação de entrada com GSAP
+            const tl = gsap.timeline({defaults: { ease: "power2.out" }});
+            tl.to(".portal-header, .ranking-table-container, footer", { visibility: 'visible' })
+              .from(".portal-logo", { y: -50, opacity: 0, duration: 1 })
+              .from(".portal-header h1, .portal-header p", { y: -20, opacity: 0, duration: 0.8, stagger: 0.2 }, "-=0.5")
+              .from(".ranking-table tr", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1 }, "-=0.5")
+              .from("footer", { opacity: 0, duration: 1 }, "-=0.5");
         });
     </script>
 </body>
