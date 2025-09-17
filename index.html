@@ -57,7 +57,6 @@
         .project-name { font-weight: 500; font-size: 1rem; }
         .observation-critical { color: var(--text-danger); font-weight: 500; }
         
-        /* ANIMAÇÃO SUTIL DE "RESPIRAÇÃO" PARA A BORDA DE ALERTA */
         @keyframes breathe-red-alert {
             0%, 100% {
                 border-left-color: rgba(255, 107, 107, 0.4);
@@ -67,13 +66,11 @@
             }
         }
 
-        /* Aplica a borda e a animação na primeira célula das linhas de alerta */
         .top-rank-warning td:first-child {
             border-left: 5px solid transparent;
             animation: breathe-red-alert 2.5s infinite ease-in-out;
         }
         
-        /* Atraso para efeito cascata */
         .ranking-table tr:nth-child(1).top-rank-warning td:first-child { animation-delay: 0s; }
         .ranking-table tr:nth-child(2).top-rank-warning td:first-child { animation-delay: 0.2s; }
         .ranking-table tr:nth-child(3).top-rank-warning td:first-child { animation-delay: 0.4s; }
@@ -147,12 +144,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- TOP 3 COM DESTAQUE DE ALERTA SUTIL -->
-                    <tr class="top-rank-warning"><td>1º</td><td><div class="project-name">CARGO FLOW FULL (Dataflow)</div></td><td>26.0%</td><td>De longe o maior consumidor. Sua otimização é crítica.</td><td><a href="diag_cargoflow.html" class="action-button">Ver Análise</a></td></tr>
+                    <!-- LINK CORRIGIDO -->
+                    <tr class="top-rank-warning"><td>1º</td><td><div class="project-name">CARGO FLOW FULL (Dataflow)</div></td><td>26.0%</td><td>De longe o maior consumidor. Sua otimização é crítica.</td><td><a href="diag_cargoflow_introducao.html" class="action-button">Ver Análise</a></td></tr>
+                    
                     <tr class="top-rank-warning"><td>2º</td><td><div class="project-name">DSS-B-18-10-CSDataflowBSS-BUGR</div></td><td>9.9%</td><td><span class="observation-critical">Alto consumo e principal causador de sobrecarga.</span></td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
                     <tr class="top-rank-warning"><td>3º</td><td><div class="project-name">RTDSample Vessel Management</div></td><td>6.1%</td><td>Consumo significativo para um único sistema.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
                     
-                    <!-- DEMAIS ITENS -->
                     <tr><td>4º</td><td><div class="project-name">Mega Finance Controls Dashboard</div></td><td>5.8%</td><td>Alto consumo para um número moderado de usuários.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
                     <tr><td>5º</td><td><div class="project-name">Monitoring Eventhouse</div></td><td>4.0%</td><td>Outro sistema de monitoramento com consumo relevante.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
                     <tr><td>6º</td><td><div class="project-name">Gestão a Vista Snow Versão 2.0</div></td><td>3.8%</td><td>Dataset grande (7.8 GB) com consumo considerável.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
@@ -181,12 +178,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Animação da Rede Neural com a cor dourada
             (function setupExternalNeuralNetwork(){const t=document.getElementById("external-neural-canvas");if(!t)return;const a=t.getContext("2d");let e,n;function i(){t.width=window.innerWidth,t.height=window.innerHeight,function(){e=[];let n=(t.width*t.height)/15e3;for(let i=0;i<n;i++){let n=2*Math.random()+.5,o=Math.random()*t.width,s=.4*Math.random()-.2,d=.4*Math.random()-.2;
             e.push(new l(o,Math.random()*t.height,s,d,n,"rgba(230, 170, 35, 0.7)"))}}()}window.addEventListener("resize",i);class l{constructor(t,e,n,i,o,s){this.x=t,this.y=e,this.dirX=n,this.dirY=i,this.size=o,this.color=s}draw(){a.beginPath(),a.arc(this.x,this.y,this.size,0,2*Math.PI,!1),a.fillStyle=this.color,a.fill()}update(){this.x>t.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>t.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const o=()=>{let n=200;for(let i=0;i<e.length;i++)for(let l=i+1;l<e.length;l++){let s=Math.sqrt(Math.pow(e[i].x-e[l].x,2)+Math.pow(e[i].y-e[l].y,2));s<n&&(
             a.strokeStyle=`rgba(230, 170, 35, ${.5*Math.pow(1-s/n,2)})`,a.lineWidth=.8,a.beginPath(),a.moveTo(e[i].x,e[i].y),a.lineTo(e[l].x,e[l].y),a.stroke())}},s=()=>{n=requestAnimationFrame(s),a.clearRect(0,0,t.width,t.height),e.forEach(t=>{t.update(),t.draw()}),o()};i(),s()})();
             
-            // Animação de entrada com GSAP
             const tl = gsap.timeline({defaults: { ease: "power2.out" }});
             tl.to(".portal-header, .ranking-table-container, footer", { visibility: 'visible' })
               .from(".portal-logo", { y: -50, opacity: 0, duration: 1 })
