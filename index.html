@@ -4,154 +4,245 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal de Análises de Performance - Bunge</title>
-    
-    <!-- Link para o Font Awesome para os ícones -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     
     <style>
         :root {
             --bunge-blue: #002d5d;
             --bunge-green: #0CBC8C;
-            --bg-page: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-dark: #343a40;
-            --text-light: #6c757d;
+            --text-highlight: #64ffda;
+            --bg-dark: #0A2840;
+            --text-light: rgba(255, 255, 255, 0.7);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: var(--bg-page);
-            color: var(--text-dark);
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        #background-canvas, #external-neural-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+        #external-neural-canvas { z-index: 1; }
+
+        .portal-wrapper {
+            position: relative;
+            z-index: 2;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
-        }
-
-        .portal-container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
             text-align: center;
-            padding: 50px 40px;
-            border-top: 5px solid var(--bunge-blue);
-            animation: fadeIn 0.8s ease-in-out;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .portal-logo {
+            width: 250px;
+            height: 120px;
+            background-image: url('https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-black-and-white.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 20px;
+            filter: brightness(10);
         }
 
-        .logo {
-            max-width: 150px;
-            margin-bottom: 25px;
+        /* --- Vistas do Portal --- */
+        #initial-view, #dashboard-view {
+            width: 100%;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
         }
 
-        h1 {
-            color: var(--bunge-blue);
-            font-size: 28px;
+        #initial-view h1, #dashboard-view h1 {
+            font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
         }
-
-        .subtitle {
-            font-size: 16px;
+        
+        #initial-view .subtitle, #dashboard-view .subtitle {
+            font-size: 1.2rem;
             color: var(--text-light);
+            font-weight: 300;
             margin-bottom: 40px;
-        }
-        
-        .card-analise {
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 30px;
+            max-width: 600px;
         }
 
-        .card-analise h2 {
-            font-size: 20px;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-        
-        .card-analise p {
-            font-size: 15px;
-            color: var(--text-light);
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .cta-button {
+        .hero-button {
             display: inline-block;
             background-color: var(--bunge-green);
             color: white;
-            padding: 15px 40px;
-            font-size: 18px;
-            font-weight: 600;
+            padding: 20px 50px;
+            font-size: 1.3rem;
+            font-weight: 700;
             text-decoration: none;
             border-radius: 50px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(12, 188, 140, 0.3);
+            box-shadow: 0 4px 20px rgba(12, 188, 140, 0.4);
+            border: none;
+            cursor: pointer;
+        }
+        .hero-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(12, 188, 140, 0.5);
         }
 
-        .cta-button:hover {
-            background-color: #0da497;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(12, 188, 140, 0.4);
+        /* --- Estilo do Dashboard (Segunda Tela) --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        .cta-button i {
-            margin-right: 10px;
+        .project-card {
+            background: rgba(30, 83, 108, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-decoration: none;
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .project-card:hover {
+            transform: translateY(-8px);
+            background: rgba(30, 83, 108, 0.9);
+            border-color: var(--text-highlight);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        footer {
-            margin-top: 40px;
-            font-size: 13px;
+        .card-icon {
+            font-size: 2.5rem;
+            color: var(--text-highlight);
+            margin-bottom: 15px;
+        }
+
+        .project-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .project-card p {
+            font-size: 1rem;
+            line-height: 1.6;
             color: var(--text-light);
-            border-top: 1px solid #e9ecef;
-            padding-top: 20px;
         }
 
-        footer strong {
-            color: var(--text-dark);
+        /* Classe para esconder as vistas */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(20px);
+            position: absolute; /* Evita que ocupe espaço quando escondido */
         }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            #initial-view h1, #dashboard-view h1 {
+                font-size: 2rem;
+            }
+        }
+
     </style>
 </head>
 <body>
+    <!-- Animações de Fundo -->
+    <canvas id="background-canvas"></canvas>
+    <canvas id="external-neural-canvas"></canvas>
 
-    <div class="portal-container">
-        <header>
-            <img src="https://cdn.worldvectorlogo.com/logos/bunge-limited-logo.svg" alt="Bunge Logo" class="logo">
+    <div class="portal-wrapper">
+        <div class="portal-logo"></div>
+
+        <!-- TELA 1: Entrada Principal -->
+        <div id="initial-view">
             <h1>Portal de Análises de Performance</h1>
             <p class="subtitle">Projetos e Dashboards de Otimização para Industrial Operations</p>
-        </header>
+            <button id="access-button" class="hero-button">Acessar Análises de Performance</button>
+        </div>
 
-        <main>
-            <div class="card-analise">
-                <h2>Diagnóstico de Performance: Cargo Flow</h2>
-                <p>Análise completa de performance, identificação de gargalos, consumo de capacidade e plano de ação estratégico para a otimização do relatório Cargo Flow.</p>
+        <!-- TELA 2: Dashboard com Opções -->
+        <div id="dashboard-view" class="hidden">
+            <h1>Dashboard de Análises</h1>
+            <p class="subtitle">Selecione um projeto para visualizar o diagnóstico detalhado.</p>
+            <div class="dashboard-grid">
                 
-                <!-- ESTE É O BOTÃO DE AÇÃO PRINCIPAL -->
-                <a href="Dashboard de Diagnóstico e Otimização VFinal.html" class="cta-button">
-                    <i class="fas fa-chart-line"></i> Acessar Diagnóstico
+                <!-- Card 1: Cargo Flow -->
+                <a href="diag_cargoflow_introducao.html" class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h3>Cargo Flow</h3>
+                    <p>Análise completa de performance, identificação de gargalos e plano de ação estratégico.</p>
                 </a>
-            </div>
-        </main>
+                
+                <!-- Card 2: Customer Services -->
+                <a href="#" class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-headset"></i></div>
+                    <h3>Customer Services</h3>
+                    <p>Análise de SLAs, tempos de resposta e satisfação do cliente para otimização de processos.</p>
+                </a>
 
-        <footer>
-            <p>Desenvolvido por <strong>Willian Oliveira</strong> | Analista de Dados Senior</p>
-        </footer>
+                <!-- Card 3: Gestão à Vista -->
+                <a href="#" class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-desktop"></i></div>
+                    <h3>Gestão à Vista</h3>
+                    <p>Desenvolvimento de painéis gerenciais com KPIs em tempo real para tomada de decisão.</p>
+                </a>
+
+                <!-- Card 4: Pagamentos no Prazo -->
+                <a href="#" class="project-card">
+                    <div class="card-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <h3>Pagamentos no Prazo</h3>
+                    <p>Diagnóstico de fluxo de pagamentos, identificando atrasos e otimizando o ciclo financeiro.</p>
+                </a>
+
+            </div>
+        </div>
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- Lógica das Animações de Fundo (sem alterações) ---
+            (function setupBackgroundAnimations() {
+                // Efeito Trigo
+                const bgCanvas = document.getElementById('background-canvas');
+                if (bgCanvas) { (()=>{const e=bgCanvas.getContext("2d");let t=[],n=0;function a(){bgCanvas.width=window.innerWidth,bgCanvas.height=window.innerHeight,t=[];for(let n=0;n<200;n++)t.push({x:Math.random()*bgCanvas.width,y:Math.random()*bgCanvas.height,length:20*Math.random()+10,speed:.3*Math.random()+.1,offset:2*Math.random()*Math.PI})}function i(){e.clearRect(0,0,bgCanvas.width,bgCanvas.height),e.strokeStyle="rgba(100, 255, 218, 0.15)",e.lineWidth=1,n++,t.forEach(t=>{t.y-=t.speed,t.y<-t.length&&(t.y=bgCanvas.height,t.x=Math.random()*bgCanvas.width);const a=2*Math.sin(t.offset+.02*n);e.beginPath(),e.moveTo(t.x+a,t.y),e.lineTo(t.x+a,t.y+t.length),e.stroke()}),requestAnimationFrame(i)}window.addEventListener("resize",a),a(),i()})(); }
+
+                // Rede Neural Externa
+                const extCanvas = document.getElementById('external-neural-canvas');
+                if (extCanvas) { (()=>{const e=extCanvas.getContext("2d");let t,n;function a(){extCanvas.width=window.innerWidth,extCanvas.height=window.innerHeight,function(){t=[];let n=(extCanvas.width*extCanvas.height)/12e3;for(let a=0;a<n;a++){let n=2*Math.random()+1,i=Math.random()*extCanvas.width,o=.6*Math.random()-.3,c=.6*Math.random()-.3;t.push(new s(i,Math.random()*extCanvas.height,o,c,n,"rgba(100, 255, 218, 0.5)"))}}()}window.addEventListener("resize",a);class s{constructor(t,n,a,i,o,c){this.x=t,this.y=n,this.dirX=a,this.dirY=i,this.size=o,this.color=c}draw(){e.beginPath(),e.arc(this.x,this.y,this.size,0,2*Math.PI,!1),e.fillStyle=this.color,e.fill()}update(){this.x>extCanvas.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>extCanvas.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const i=()=>{let n=180;for(let a=0;a<t.length;a++)for(let o=a+1;o<t.length;o++){let c=Math.sqrt(Math.pow(t[a].x-t[o].x,2)+Math.pow(t[a].y-t[o].y,2));c<n&&(e.strokeStyle=`rgba(100, 255, 218, ${.4*Math.pow(1-c/n,2)})`,e.lineWidth=1,e.beginPath(),e.moveTo(t[a].x,t[a].y),e.lineTo(t[o].x,t[o].y),e.stroke())}},o=()=>{n=requestAnimationFrame(o),e.clearRect(0,0,extCanvas.width,extCanvas.height),t.forEach(e=>{e.update(),e.draw()}),i()};a(),o()})(); }
+            })();
+
+            // --- Lógica da Transição de Tela ---
+            const initialView = document.getElementById('initial-view');
+            const dashboardView = document.getElementById('dashboard-view');
+            const accessButton = document.getElementById('access-button');
+
+            accessButton.addEventListener('click', () => {
+                // Esconde a primeira tela
+                initialView.classList.add('hidden');
+
+                // Após a animação de saída, mostra a segunda tela
+                setTimeout(() => {
+                    dashboardView.classList.remove('hidden');
+                }, 300); // O tempo deve ser um pouco menor que a transição do CSS
+            });
+
+        });
+    </script>
 </body>
 </html>
