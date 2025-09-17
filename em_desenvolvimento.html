@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise em Desenvolvimento - Bunge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    
+    <style>
+        :root {
+            --bunge-green: #0CBC8C;
+            --text-highlight: #64ffda;
+            --bg-dark: #0A2840;
+            --text-light: rgba(255, 255, 255, 0.7);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Roboto', sans-serif; background-color: var(--bg-dark); color: #fff; margin: 0; overflow: hidden; }
+        
+        #background-canvas, #external-neural-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; }
+        #external-neural-canvas { z-index: 1; }
+
+        .container {
+            position: relative; z-index: 2; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; min-height: 100vh;
+            padding: 20px; text-align: center;
+        }
+
+        .content-card {
+            background: rgba(30, 83, 108, 0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 50px 40px;
+            max-width: 600px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 1s ease-out;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .icon { font-size: 4rem; color: var(--text-highlight); margin-bottom: 25px; animation: pulse 2.5s infinite ease-in-out; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 { font-size: 2rem; font-weight: 700; margin-bottom: 15px; }
+        p { font-size: 1.1rem; color: var(--text-light); line-height: 1.7; margin-bottom: 40px; }
+        
+        .back-button {
+            display: inline-block; background-color: transparent; color: var(--bunge-green);
+            padding: 15px 40px; font-size: 1.1rem; font-weight: 600; text-decoration: none;
+            border-radius: 50px; transition: all 0.3s ease; border: 2px solid var(--bunge-green);
+        }
+        .back-button:hover { background-color: var(--bunge-green); color: white; }
+    </style>
+</head>
+<body>
+    <canvas id="background-canvas"></canvas>
+    <canvas id="external-neural-canvas"></canvas>
+
+    <div class="container">
+        <div class="content-card">
+            <div class="icon"><i class="fa-solid fa-gears"></i></div>
+            <h1>Análise em Desenvolvimento</h1>
+            <p>Nossa equipe de dados já está trabalhando na engenharia e otimização deste projeto. Em breve, o diagnóstico completo estará disponível neste portal.</p>
+            <a href="index.html" class="back-button">&larr; Voltar ao Dashboard</a>
+        </div>
+    </div>
+    <script>
+        // Animações de fundo (código minificado para economizar espaço)
+        (function setupBackgroundAnimations(){const a=document.getElementById("background-canvas");if(a){(()=>{const t=a.getContext("2d");let n=[],o=0;function i(){a.width=window.innerWidth,a.height=window.innerHeight,n=[];for(let o=0;o<200;o++)n.push({x:Math.random()*a.width,y:Math.random()*a.height,length:20*Math.random()+10,speed:.3*Math.random()+.1,offset:2*Math.random()*Math.PI})}function e(){t.clearRect(0,0,a.width,a.height),t.strokeStyle="rgba(100, 255, 218, 0.15)",t.lineWidth=1,o++,n.forEach(n=>{n.y-=n.speed,n.y<-n.length&&(n.y=a.height,n.x=Math.random()*a.width);const o=2*Math.sin(n.offset+.02*o);t.beginPath(),t.moveTo(n.x+o,n.y),t.lineTo(n.x+o,n.y+n.length),t.stroke()}),requestAnimationFrame(e)}window.addEventListener("resize",i),i(),e()})()}const t=document.getElementById("external-neural-canvas");if(t){(()=>{const a=t.getContext("2d");let n,o;function i(){t.width=window.innerWidth,t.height=window.innerHeight,function(){n=[];let o=(t.width*t.height)/12e3;for(let i=0;i<o;i++){let o=2*Math.random()+1,e=Math.random()*t.width,r=.6*Math.random()-.3,h=.6*Math.random()-.3;n.push(new c(e,Math.random()*t.height,r,h,o,"rgba(100, 255, 218, 0.5)"))}}()}window.addEventListener("resize",i);class c{constructor(t,n,a,o,i,e){this.x=t,this.y=n,this.dirX=a,this.dirY=o,this.size=i,this.color=e}draw(){a.beginPath(),a.arc(this.x,this.y,this.size,0,2*Math.PI,!1),a.fillStyle=this.color,a.fill()}update(){this.x>t.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>t.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const e=()=>{let o=180;for(let i=0;i<n.length;i++)for(let c=i+1;c<n.length;c++){let r=Math.sqrt(Math.pow(n[i].x-n[c].x,2)+Math.pow(n[i].y-n[c].y,2));r<o&&(a.strokeStyle=`rgba(100, 255, 218, ${.4*Math.pow(1-r/o,2)})`,a.lineWidth=1,a.beginPath(),a.moveTo(n[i].x,n[i].y),a.lineTo(n[c].x,n[c].y),a.stroke())}},r=()=>{o=requestAnimationFrame(r),a.clearRect(0,0,t.width,t.height),n.forEach(a=>{a.update(),a.draw()}),e()};i(),r()})()}})();
+    </script>
+</body>
+</html>
