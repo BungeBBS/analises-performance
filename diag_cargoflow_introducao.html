@@ -13,9 +13,9 @@
         :root {
             --bunge-green: #0CBC8C;
             --bunge-red: #dc3545;
-            --text-highlight: #64ffda;
+            --text-highlight: #64ffda; /* Mantido para alguns destaques, mas o azul dominará */
             --bunge-orange: #fd7e14;
-            --bunge-blue: #46a3ff; 
+            --bunge-blue: #46a3ff; /* Novo azul para a animação */
         }
 
         body { 
@@ -29,14 +29,18 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
         }
+        /* Z-index ajustados para a hierarquia correta */
         #background-canvas { z-index: 1; opacity: 0.8; }
         #external-neural-canvas { z-index: 10000; }
         .main-container { position: relative; z-index: 2; }
+
+
         .main-container.blurred { filter: blur(8px) brightness(0.9); }
 
+        /* TELA DE ENTRADA RESTAURADA */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            z-index: 10002;
+            z-index: 10002; /* Acima de tudo */
             display: flex; justify-content: center; align-items: center;
             background-image: linear-gradient(to bottom right, #1E536C, #0A2840);
             opacity: 1; transition: opacity 0.5s ease-out 1.5s;
@@ -60,7 +64,7 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: transparent;
             display: flex; align-items: center; justify-content: center;
-            z-index: 10001;
+            z-index: 10001; /* Acima do conteúdo principal, abaixo do splash */
             opacity: 0; transition: opacity 0.5s ease-in;
             padding: 20px; box-sizing: border-box;
             pointer-events: none;
@@ -74,7 +78,7 @@
             width: 100%; max-width: 1100px; height: 90vh; max-height: 800px;
             transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             border-top: 8px solid var(--bunge-red); position: relative; display: flex; flex-direction: column; overflow: hidden;
-            z-index: 10001;
+            z-index: 10001; /* Z-index do modal para ficar sobre a animação neural */
         }
         #analogy-overlay.visible #analogy-modal { transform: scale(1); }
 
@@ -96,7 +100,7 @@
         #sticky-visual-icon-container {
             font-size: 8rem; opacity: 0; transform: scale(0.8) rotate(-10deg);
             transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            color: var(--bunge-blue);
+            color: var(--bunge-blue); /* Cor do ícone para azul */
         }
         #sticky-visual-icon-container.visible { opacity: 1; transform: scale(1) rotate(0deg); }
         
@@ -116,7 +120,7 @@
         
         .slide-title { font-size: 2.5rem; margin-bottom: 20px; color: #fff; font-weight: 700; line-height: 1.2;}
         .slide-text { font-size: 1.2rem; line-height: 1.8; color: rgba(255, 255, 255, 0.8); font-weight: 300;}
-        .slide-text b { color: var(--bunge-blue); font-weight: 700; }
+        .slide-text b { color: var(--bunge-blue); font-weight: 700; } /* Destaque para azul */
         
         .conclusion-slide ul { list-style: none; padding: 0; display: flex; gap: 30px; text-align: center; }
         .conclusion-slide li { flex: 1; display: flex; flex-direction: column; align-items: center; font-size: 1rem; line-height: 1.6; color: #fff; }
@@ -151,6 +155,7 @@
     <div id="analogy-overlay">
         <canvas id="external-neural-canvas"></canvas>
         <div id="analogy-modal">
+            <!-- Conteúdo do modal permanece o mesmo -->
             <div class="modal-header">
                 <div class="modal-logo"></div>
                 <div class="progress-bar-container"><div class="progress-bar"></div></div>
@@ -159,7 +164,8 @@
             <div class="story-body">
                  <div id="sticky-visual"><div id="sticky-visual-icon-container"><i class=""></i></div></div>
                 <div id="content-panels">
-                    <div class="story-slide" data-icon-class="fa-solid fa-lightbulb">
+                    <!-- Todos os slides aqui... -->
+                     <div class="story-slide" data-icon-class="fa-solid fa-lightbulb">
                         <h3 class="slide-title">Desvendando a Causa Raiz</h3>
                         <p class="slide-text">Nos últimos meses, o ambiente do Power BI tem apresentado instabilidade. Vamos contar a história do que realmente acontece nos bastidores.</p>
                     </div>
@@ -203,60 +209,108 @@
         </div>
     </div>
 
-    <div id="main-content" class="main-container blurred"></div>
+    <div id="main-content" class="main-container blurred">
+        <!-- Este conteúdo só aparecerá se o usuário pular a introdução -->
+        <!-- Poderia ser um link direto para o relatório -->
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
             // --- INÍCIO DAS ANIMAÇÕES DE FUNDO ---
+
+            // Animação 1: Fundo sutil de partículas azuis (sempre ativo)
             (function setupBackgroundAnimation() {
                 const canvas = document.getElementById('background-canvas');
                 if (!canvas) return;
                 const ctx = canvas.getContext('2d');
                 let particles = [];
-                function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+                
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                
                 class Particle {
                     constructor() {
-                        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
-                        this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 0.5 - 0.25; this.speedY = Math.random() * 0.5 - 0.25;
+                        this.x = Math.random() * canvas.width;
+                        this.y = Math.random() * canvas.height;
+                        this.size = Math.random() * 2 + 1;
+                        this.speedX = Math.random() * 0.5 - 0.25;
+                        this.speedY = Math.random() * 0.5 - 0.25;
                         this.color = `rgba(70, 170, 255, ${Math.random() * 0.5 + 0.1})`;
                     }
                     update() {
-                        this.x += this.speedX; this.y += this.speedY;
+                        this.x += this.speedX;
+                        this.y += this.speedY;
                         if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
                         if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
                     }
-                    draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
-                }
-                function initParticles() {
-                    particles = []; const numberOfParticles = (canvas.width * canvas.height) / 30000;
-                    for (let i = 0; i < numberOfParticles; i++) { particles.push(new Particle()); }
-                }
-                function animate() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate);
-                }
-                window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
-                resizeCanvas(); initParticles(); animate();
-            })();
-
-            let externalAnimationId = null;
-            window.startExternalAnimations = function() {
-                if (externalAnimationId) return;
-                const canvas = document.getElementById('external-neural-canvas'); if (!canvas) return;
-                const ctx = canvas.getContext('2d'); let particlesArray;
-                function resizeHandler() {
-                    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-                    let numberOfParticles = (canvas.height * canvas.width) / 15000; particlesArray = [];
-                    for(let i = 0; i < numberOfParticles; i++) {
-                        let size = (Math.random() * 2) + 0.5; let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                        let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                        let directionX = (Math.random() * .4) - .2; let directionY = (Math.random() * .4) - .2;
-                        particlesArray.push(new Particle(x, y, directionX, directionY, size, 'rgba(70, 170, 255, 0.8)'));
+                    draw() {
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fill();
                     }
                 }
+
+                function initParticles() {
+                    particles = [];
+                    const numberOfParticles = (canvas.width * canvas.height) / 30000;
+                    for (let i = 0; i < numberOfParticles; i++) {
+                        particles.push(new Particle());
+                    }
+                }
+
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => {
+                        p.update();
+                        p.draw();
+                    });
+                    requestAnimationFrame(animate);
+                }
+
+                window.addEventListener('resize', () => {
+                    resizeCanvas();
+                    initParticles();
+                });
+
+                resizeCanvas();
+                initParticles();
+                animate();
+            })();
+
+
+            // Animação 2: Rede Neural principal (ativada com o modal)
+            let externalAnimationId = null;
+            window.startExternalAnimations = function() {
+                if (externalAnimationId) return; // Não iniciar se já estiver rodando
+                
+                const canvas = document.getElementById('external-neural-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let particlesArray;
+
+                function resizeHandler() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    let numberOfParticles = (canvas.height * canvas.width) / 15000;
+                    particlesArray = [];
+                    for(let i = 0; i < numberOfParticles; i++) {
+                        let size = (Math.random() * 2) + 0.5;
+                        let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                        let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                        let directionX = (Math.random() * .4) - .2;
+                        let directionY = (Math.random() * .4) - .2;
+                        particlesArray.push(new Particle(x, y, directionX, directionY, size, 'rgba(70, 170, 255, 0.8)')); // Cor azul
+                    }
+                }
+                
                 class Particle {
-                    constructor(x, y, directionX, directionY, size, color) { this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color; }
+                    constructor(x, y, directionX, directionY, size, color) {
+                        this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color;
+                    }
                     draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
                     update() {
                         if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
@@ -264,6 +318,7 @@
                         this.x += this.directionX; this.y += this.directionY;
                     }
                 }
+
                 const connect = () => {
                     let maxDistance = 200;
                     for (let a = 0; a < particlesArray.length; a++) {
@@ -271,33 +326,47 @@
                             let distance = Math.sqrt(Math.pow(particlesArray[a].x - particlesArray[b].x, 2) + Math.pow(particlesArray[a].y - particlesArray[b].y, 2));
                             if (distance < maxDistance) {
                                 let opacity = 1 - (distance / maxDistance);
-                                ctx.strokeStyle = `rgba(70, 170, 255, ${opacity * 0.5})`; ctx.lineWidth = 0.8;
-                                ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
+                                ctx.strokeStyle = `rgba(70, 170, 255, ${opacity * 0.5})`; // Cor azul
+                                ctx.lineWidth = 0.8; ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
                             }
                         }
                     }
                 };
+
                 const animate = () => {
-                    externalAnimationId = requestAnimationFrame(animate); ctx.clearRect(0, 0, innerWidth, innerHeight);
-                    particlesArray.forEach(p => { p.update(); p.draw(); }); connect();
+                    externalAnimationId = requestAnimationFrame(animate);
+                    ctx.clearRect(0, 0, innerWidth, innerHeight);
+                    particlesArray.forEach(p => { p.update(); p.draw(); });
+                    connect();
                 };
-                window.addEventListener('resize', resizeHandler); resizeHandler(); animate();
+
+                window.addEventListener('resize', resizeHandler);
+                resizeHandler();
+                animate();
             };
+
             window.stopExternalAnimations = function() {
                 if (externalAnimationId) {
-                    cancelAnimationFrame(externalAnimationId); externalAnimationId = null;
+                    cancelAnimationFrame(externalAnimationId);
+                    externalAnimationId = null;
                     const canvas = document.getElementById('external-neural-canvas');
-                    if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                    if (canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
                 }
             };
             // --- FIM DAS ANIMAÇÕES DE FUNDO ---
 
 
-            // --- Lógica de Navegação do Modal ---
+
+            // --- Lógica de Navegação do Modal (sem alterações) ---
             const splashScreen = document.getElementById('splash-screen');
             const analogyOverlay = document.getElementById('analogy-overlay');
+            const mainContainer = document.querySelector('.main-container');
             const closeBtn = document.querySelector('.close-btn');
             const checkbox = document.getElementById('dont-show-again');
+            
             const storySlides = document.querySelectorAll('.story-slide');
             const navBtn = document.getElementById('story-nav-btn');
             const backBtn = document.getElementById('story-back-btn'); 
@@ -363,9 +432,11 @@
                     if(splashScreen) splashScreen.remove();
                     return;
                 }
+
                 analogyOverlay.classList.add('visible');
-                if (window.startExternalAnimations) window.startExternalAnimations();
+                if (window.startExternalAnimations) window.startExternalAnimations(); // Inicia a animação neural
                 updateStoryView();
+                
                 navBtn.addEventListener('click', handleNavClick);
                 backBtn.addEventListener('click', handleBackClick);
                 closeBtn.addEventListener('click', closeModal);
