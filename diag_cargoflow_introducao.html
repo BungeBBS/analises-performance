@@ -15,6 +15,7 @@
             --bunge-red: #dc3545;
             --text-highlight: #64ffda;
             --bunge-orange: #fd7e14;
+            --bunge-blue: #46a3ff; 
         }
 
         body { 
@@ -28,15 +29,15 @@
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
         }
-        #background-canvas { z-index: 9998; }
-        #external-neural-canvas { z-index: 9999; }
-
+        #background-canvas { z-index: 1; opacity: 0.8; }
+        #external-neural-canvas { z-index: 10000; }
+        .main-container { position: relative; z-index: 2; }
         .main-container.blurred { filter: blur(8px) brightness(0.9); }
 
-        /* TELA DE ENTRADA RESTAURADA */
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            z-index: 10001; display: flex; justify-content: center; align-items: center;
+            z-index: 10002;
+            display: flex; justify-content: center; align-items: center;
             background-image: linear-gradient(to bottom right, #1E536C, #0A2840);
             opacity: 1; transition: opacity 0.5s ease-out 1.5s;
         }
@@ -59,7 +60,8 @@
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: transparent;
             display: flex; align-items: center; justify-content: center;
-            z-index: 10000; opacity: 0; transition: opacity 0.5s ease-in;
+            z-index: 10001;
+            opacity: 0; transition: opacity 0.5s ease-in;
             padding: 20px; box-sizing: border-box;
             pointer-events: none;
         }
@@ -72,7 +74,7 @@
             width: 100%; max-width: 1100px; height: 90vh; max-height: 800px;
             transform: scale(0.95); transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             border-top: 8px solid var(--bunge-red); position: relative; display: flex; flex-direction: column; overflow: hidden;
-            z-index: 10000;
+            z-index: 10001;
         }
         #analogy-overlay.visible #analogy-modal { transform: scale(1); }
 
@@ -94,7 +96,7 @@
         #sticky-visual-icon-container {
             font-size: 8rem; opacity: 0; transform: scale(0.8) rotate(-10deg);
             transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            color: var(--text-highlight);
+            color: var(--bunge-blue);
         }
         #sticky-visual-icon-container.visible { opacity: 1; transform: scale(1) rotate(0deg); }
         
@@ -114,28 +116,11 @@
         
         .slide-title { font-size: 2.5rem; margin-bottom: 20px; color: #fff; font-weight: 700; line-height: 1.2;}
         .slide-text { font-size: 1.2rem; line-height: 1.8; color: rgba(255, 255, 255, 0.8); font-weight: 300;}
-        .slide-text b { color: var(--text-highlight); font-weight: 700; }
+        .slide-text b { color: var(--bunge-blue); font-weight: 700; }
         
-        /* CORREÇÃO: Layout do slide de conclusão */
-        .conclusion-slide ul {
-            list-style: none; padding: 0;
-            display: flex;
-            gap: 30px; /* Espaço entre os "cards" */
-            text-align: center;
-        }
-        .conclusion-slide li {
-            flex: 1;
-            display: flex;
-            flex-direction: column; /* Ícone acima do texto */
-            align-items: center;
-            font-size: 1rem; line-height: 1.6;
-            color: #fff; /* Cor do texto corrigida */
-        }
-        .conclusion-slide li i {
-            color: var(--bunge-green);
-            font-size: 2.5rem; /* Ícone maior */
-            margin-bottom: 15px;
-        }
+        .conclusion-slide ul { list-style: none; padding: 0; display: flex; gap: 30px; text-align: center; }
+        .conclusion-slide li { flex: 1; display: flex; flex-direction: column; align-items: center; font-size: 1rem; line-height: 1.6; color: #fff; }
+        .conclusion-slide li i { color: var(--bunge-green); font-size: 2.5rem; margin-bottom: 15px; }
 
         .modal-footer { padding: 20px 35px; display: flex; justify-content: space-between; align-items: center; background-color: rgba(0,0,0,0.2); border-top: 1px solid rgba(255,255,255,0.1); }
         .footer-left { display: flex; align-items: center; gap: 15px; }
@@ -149,13 +134,11 @@
         .story-back-btn { background-color: transparent; color: var(--bunge-green); border: 2px solid var(--bunge-green); }
         .story-back-btn:hover { background-color: rgba(12, 188, 140, 0.1); color: #fff; border-color: #fff; }
         .story-back-btn.hidden { opacity: 0; pointer-events: none; }
-
     </style>
 </head>
 <body>
     <canvas id="background-canvas"></canvas>
 
-    <!-- TELA DE ENTRADA RESTAURADA -->
     <div id="splash-screen">
         <div class="splash-content">
             <div class="splash-logo"></div>
@@ -167,44 +150,40 @@
 
     <div id="analogy-overlay">
         <canvas id="external-neural-canvas"></canvas>
-
         <div id="analogy-modal">
             <div class="modal-header">
                 <div class="modal-logo"></div>
                 <div class="progress-bar-container"><div class="progress-bar"></div></div>
                 <button class="close-btn" title="Fechar">&times;</button>
             </div>
-            
             <div class="story-body">
-                <div id="sticky-visual"><div id="sticky-visual-icon-container"><i class=""></i></div></div>
+                 <div id="sticky-visual"><div id="sticky-visual-icon-container"><i class=""></i></div></div>
                 <div id="content-panels">
-                    <div class="story-slide" data-icon-class="fa-solid fa-lightbulb" data-icon-color="#f0e241">
+                    <div class="story-slide" data-icon-class="fa-solid fa-lightbulb">
                         <h3 class="slide-title">Desvendando a Causa Raiz</h3>
                         <p class="slide-text">Nos últimos meses, o ambiente do Power BI tem apresentado instabilidade. Vamos contar a história do que realmente acontece nos bastidores.</p>
                     </div>
-                    <div class="story-slide" data-icon-class="fa-solid fa-utensils" data-icon-color="#007bff">
+                    <div class="story-slide" data-icon-class="fa-solid fa-utensils">
                         <h3 class="slide-title">O Restaurante (Nosso Ambiente)</h3>
                         <p class="slide-text">Nossa plataforma de dados é um restaurante com uma capacidade diária para servir <b>5.529 "pratos"</b> (consultas). O objetivo é ser rápido e eficiente.</p>
                     </div>
-                    <div class="story-slide" data-icon-class="fa-solid fa-truck-monster" data-icon-color="#dc3545">
+                    <div class="story-slide" data-icon-class="fa-solid fa-truck-monster">
                         <h3 class="slide-title">O Vilão Silencioso (CARGO FLOW)</h3>
                         <p class="slide-text">Um único "prato" é tão complexo que, sozinho, <b>consome 26% de toda a energia da cozinha</b>, congestionando o serviço para todos os outros.</p>
                     </div>
-                    <div class="story-slide" data-icon-class="fa-solid fa-fire-burner" data-icon-color="#fd7e14">
+                    <div class="story-slide" data-icon-class="fa-solid fa-fire-burner">
                         <h3 class="slide-title">A Cozinha em Colapso</h3>
                         <p class="slide-text">O "raio-X" da cozinha mostra o caos: o "chef" (SQL) joga ingredientes no chão (<b>"Spill to TempDB"</b>), uma operação <b>milhares de vezes mais lenta</b>. Por isso um prato leva mais de <b>10 minutos</b>.</p>
                     </div>
-                    <div class="story-slide" data-icon-class="fa-solid fa-moon" data-icon-color="#6c757d">
+                    <div class="story-slide" data-icon-class="fa-solid fa-moon">
                         <h3 class="slide-title">O Desperdício Noturno</h3>
                         <p class="slide-text">Pior: um gerente automático força a cozinha a preparar esse prato complexo a cada 30 minutos, <b>24 horas por dia</b>, mesmo de madrugada, servindo mesas que não existem.</p>
                     </div>
-                    <div class="story-slide" data-icon-class="fa-solid fa-store-slash" data-icon-color="#dc3545">
+                    <div class="story-slide" data-icon-class="fa-solid fa-store-slash">
                         <h3 class="slide-title">O Efeito Dominó</h3>
                         <p class="slide-text">Com a cozinha exausta, o serviço falha. O resultado: <b>+25 falhas de atualização</b>, instabilidade e clientes sem relatórios. O Power BI é apenas a vítima.</p>
                     </div>
-                    
-                    <!-- SLIDE FINAL COM LAYOUT CORRIGIDO -->
-                    <div class="story-slide conclusion-slide" data-icon-class="fa-solid fa-flag-checkered" data-icon-color="#0CBC8C">
+                    <div class="story-slide conclusion-slide" data-icon-class="fa-solid fa-flag-checkered">
                         <h3 class="slide-title">Plano de Ação</h3>
                         <ul>
                             <li><i class="fa-solid fa-microscope"></i><div><strong>Diagnóstico:</strong> A instabilidade do Power BI é um sintoma. A causa-raiz está na <b>sobrecarga do nosso SQL</b>, que opera no limite.</div></li>
@@ -214,11 +193,9 @@
                     </div>
                 </div>
             </div>
-
             <div class="modal-footer">
                 <div class="footer-left">
                     <button id="story-back-btn" class="story-back-btn hidden">&larr; Voltar</button>
-                    <!-- CORREÇÃO: Checkbox e texto agora visíveis -->
                     <label class="dont-show-again"><input type="checkbox" id="dont-show-again"> Não mostrar novamente</label>
                 </div>
                 <button id="story-nav-btn" class="story-nav-btn">Continuar &rarr;</button>
@@ -226,22 +203,101 @@
         </div>
     </div>
 
-    <div id="main-content" class="main-container blurred">
-        <h1>Seu Relatório Completo Começa Aqui</h1>
-    </div>
+    <div id="main-content" class="main-container blurred"></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Blocos de Animação de Fundo (sem alteração)
-            (function setupBackgroundAnimations() { /* ... Lógica das animações ... */ })();
+            
+            // --- INÍCIO DAS ANIMAÇÕES DE FUNDO ---
+            (function setupBackgroundAnimation() {
+                const canvas = document.getElementById('background-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                let particles = [];
+                function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+                class Particle {
+                    constructor() {
+                        this.x = Math.random() * canvas.width; this.y = Math.random() * canvas.height;
+                        this.size = Math.random() * 2 + 1; this.speedX = Math.random() * 0.5 - 0.25; this.speedY = Math.random() * 0.5 - 0.25;
+                        this.color = `rgba(70, 170, 255, ${Math.random() * 0.5 + 0.1})`;
+                    }
+                    update() {
+                        this.x += this.speedX; this.y += this.speedY;
+                        if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                        if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                    }
+                    draw() { ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); }
+                }
+                function initParticles() {
+                    particles = []; const numberOfParticles = (canvas.width * canvas.height) / 30000;
+                    for (let i = 0; i < numberOfParticles; i++) { particles.push(new Particle()); }
+                }
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate);
+                }
+                window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+                resizeCanvas(); initParticles(); animate();
+            })();
 
-            // Lógica de Navegação (sem alteração funcional, apenas garante que os elementos corretos estão sendo referenciados)
+            let externalAnimationId = null;
+            window.startExternalAnimations = function() {
+                if (externalAnimationId) return;
+                const canvas = document.getElementById('external-neural-canvas'); if (!canvas) return;
+                const ctx = canvas.getContext('2d'); let particlesArray;
+                function resizeHandler() {
+                    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+                    let numberOfParticles = (canvas.height * canvas.width) / 15000; particlesArray = [];
+                    for(let i = 0; i < numberOfParticles; i++) {
+                        let size = (Math.random() * 2) + 0.5; let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
+                        let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
+                        let directionX = (Math.random() * .4) - .2; let directionY = (Math.random() * .4) - .2;
+                        particlesArray.push(new Particle(x, y, directionX, directionY, size, 'rgba(70, 170, 255, 0.8)'));
+                    }
+                }
+                class Particle {
+                    constructor(x, y, directionX, directionY, size, color) { this.x = x; this.y = y; this.directionX = directionX; this.directionY = directionY; this.size = size; this.color = color; }
+                    draw() { ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false); ctx.fillStyle = this.color; ctx.fill(); }
+                    update() {
+                        if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
+                        if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+                        this.x += this.directionX; this.y += this.directionY;
+                    }
+                }
+                const connect = () => {
+                    let maxDistance = 200;
+                    for (let a = 0; a < particlesArray.length; a++) {
+                        for (let b = a + 1; b < particlesArray.length; b++) {
+                            let distance = Math.sqrt(Math.pow(particlesArray[a].x - particlesArray[b].x, 2) + Math.pow(particlesArray[a].y - particlesArray[b].y, 2));
+                            if (distance < maxDistance) {
+                                let opacity = 1 - (distance / maxDistance);
+                                ctx.strokeStyle = `rgba(70, 170, 255, ${opacity * 0.5})`; ctx.lineWidth = 0.8;
+                                ctx.beginPath(); ctx.moveTo(particlesArray[a].x, particlesArray[a].y); ctx.lineTo(particlesArray[b].x, particlesArray[b].y); ctx.stroke();
+                            }
+                        }
+                    }
+                };
+                const animate = () => {
+                    externalAnimationId = requestAnimationFrame(animate); ctx.clearRect(0, 0, innerWidth, innerHeight);
+                    particlesArray.forEach(p => { p.update(); p.draw(); }); connect();
+                };
+                window.addEventListener('resize', resizeHandler); resizeHandler(); animate();
+            };
+            window.stopExternalAnimations = function() {
+                if (externalAnimationId) {
+                    cancelAnimationFrame(externalAnimationId); externalAnimationId = null;
+                    const canvas = document.getElementById('external-neural-canvas');
+                    if (canvas) { const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height); }
+                }
+            };
+            // --- FIM DAS ANIMAÇÕES DE FUNDO ---
+
+
+            // --- Lógica de Navegação do Modal ---
             const splashScreen = document.getElementById('splash-screen');
             const analogyOverlay = document.getElementById('analogy-overlay');
-            const mainContainer = document.querySelector('.main-container');
             const closeBtn = document.querySelector('.close-btn');
             const checkbox = document.getElementById('dont-show-again');
-            
             const storySlides = document.querySelectorAll('.story-slide');
             const navBtn = document.getElementById('story-nav-btn');
             const backBtn = document.getElementById('story-back-btn'); 
@@ -254,11 +310,9 @@
             const storageKey = 'hideCargoFlowStory_v7';
 
             function startFullReport() {
-                // Redireciona o usuário para a página do diagnóstico completo
                 window.location.href = 'diag_cargoflow.html';
             }
 
-            
             function closeModal() {
                 if (checkbox.checked) {
                     localStorage.setItem(storageKey, 'true');
@@ -271,13 +325,10 @@
             function updateStoryView() {
                 const currentSlide = storySlides[currentStep];
                 const iconClass = currentSlide.dataset.iconClass;
-                const iconColor = currentSlide.dataset.iconColor || 'var(--text-highlight)';
+                const iconColor = currentSlide.dataset.iconColor || 'var(--bunge-blue)';
                 
                 progressBar.style.width = `${((currentStep) / (totalSteps - 1)) * 100}%`;
-
-                storySlides.forEach((slide, index) => {
-                    slide.classList.toggle('active', index === currentStep);
-                });
+                storySlides.forEach((slide, index) => slide.classList.toggle('active', index === currentStep));
 
                 iconContainer.classList.remove('visible');
                 setTimeout(() => {
@@ -287,7 +338,6 @@
                 }, 250);
 
                 navBtn.innerHTML = (currentStep === totalSteps - 1) ? 'Entendi, Iniciar Análise' : 'Continuar &rarr;';
-                
                 backBtn.classList.toggle('hidden', currentStep === 0);
             }
             
@@ -313,11 +363,9 @@
                     if(splashScreen) splashScreen.remove();
                     return;
                 }
-
                 analogyOverlay.classList.add('visible');
                 if (window.startExternalAnimations) window.startExternalAnimations();
                 updateStoryView();
-                
                 navBtn.addEventListener('click', handleNavClick);
                 backBtn.addEventListener('click', handleBackClick);
                 closeBtn.addEventListener('click', closeModal);
@@ -330,9 +378,7 @@
                  if (splashScreen) {
                     splashScreen.classList.add('hidden');
                     splashScreen.addEventListener('transitionend', () => {
-                        if (splashScreen.parentElement) {
-                            splashScreen.remove();
-                        }
+                        if (splashScreen.parentElement) splashScreen.remove();
                         showAnalogyModal();
                     });
                 } else {
