@@ -12,16 +12,19 @@
     
     <style>
         :root {
-            --bunge-green: #0CBC8C;
-            --text-highlight: #64ffda;
-            --text-danger: #ff6b6b;
+            /* PALETA DE CORES */
+            --bunge-primary: #043C5A;
+            --bunge-secondary: #3C647D;
+            --bunge-accent: #8C4799; /* Cor roxa para botões principais */
+            --bunge-highlight-gold: #E6AA23; /* Dourado para animação de fundo */
+            --text-danger: #ff6b6b; /* Vermelho para alerta */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Roboto', sans-serif; color: #fff; margin: 0;
-            background: linear-gradient(-45deg, #0a2840, #1e536c, #0d3b36, #0a2840);
+            background: linear-gradient(-45deg, var(--bunge-primary), var(--bunge-secondary), var(--bunge-primary), var(--bunge-secondary));
             background-size: 400% 400%;
             animation: gradientWave 25s ease infinite;
         }
@@ -35,7 +38,7 @@
             padding: 40px 20px; text-align: center;
         }
 
-        .portal-header { visibility: hidden; } /* Escondido para animar com GSAP */
+        .portal-header { visibility: hidden; }
         .portal-logo {
             width: 250px; height: 110px;
             background-image: url('https://cdn.freebiesupply.com/logos/large/2x/bunge-logo-black-and-white.png');
@@ -45,32 +48,81 @@
         .portal-header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
         .portal-header p { font-size: 1.1rem; color: rgba(255, 255, 255, 0.7); font-weight: 300; max-width: 700px; margin: 0 auto 40px auto; line-height: 1.6; }
 
-        .ranking-table-container { visibility: hidden; /* Escondido para animar com GSAP */ width: 100%; max-width: 1300px; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(8px); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .ranking-table-container { visibility: hidden; width: 100%; max-width: 1300px; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(8px); border-radius: 12px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
         .ranking-table { width: 100%; border-collapse: collapse; text-align: left; }
         .ranking-table th { padding: 15px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: rgba(255, 255, 255, 0.6); border-bottom: 2px solid rgba(255, 255, 255, 0.2); }
-        .ranking-table td { padding: 18px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); vertical-align: middle; }
+        .ranking-table td { padding: 18px 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.1); vertical-align: middle; transition: background-color 0.3s ease; }
         .ranking-table tr:last-child td { border-bottom: none; }
         
         .project-name { font-weight: 500; font-size: 1rem; }
         .observation-critical { color: var(--text-danger); font-weight: 500; }
-        .action-button { display: inline-block; background-color: var(--bunge-green); color: white; padding: 10px 20px; font-size: 0.9rem; text-decoration: none; border-radius: 6px; transition: all 0.3s ease; white-space: nowrap; }
-        .action-button.disabled { background-color: #6c757d; cursor: not-allowed; opacity: 0.7; }
-        .action-button:not(.disabled):hover { background-color: var(--text-highlight); color: #0A2840; }
         
-        /* Nova Assinatura */
+        /* ANIMAÇÃO SUTIL DE "RESPIRAÇÃO" PARA A BORDA DE ALERTA */
+        @keyframes breathe-red-alert {
+            0%, 100% {
+                border-left-color: rgba(255, 107, 107, 0.4);
+            }
+            50% {
+                border-left-color: rgba(255, 107, 107, 1);
+            }
+        }
+
+        /* Aplica a borda e a animação na primeira célula das linhas de alerta */
+        .top-rank-warning td:first-child {
+            border-left: 5px solid transparent;
+            animation: breathe-red-alert 2.5s infinite ease-in-out;
+        }
+        
+        /* Atraso para efeito cascata */
+        .ranking-table tr:nth-child(1).top-rank-warning td:first-child { animation-delay: 0s; }
+        .ranking-table tr:nth-child(2).top-rank-warning td:first-child { animation-delay: 0.2s; }
+        .ranking-table tr:nth-child(3).top-rank-warning td:first-child { animation-delay: 0.4s; }
+        
+        .action-button { 
+            display: inline-block; 
+            background-color: var(--bunge-accent); 
+            color: #fff;
+            padding: 10px 20px; 
+            font-size: 0.9rem; 
+            font-weight: 700; 
+            text-decoration: none; 
+            border-radius: 6px; 
+            transition: all 0.3s ease; 
+            white-space: nowrap; 
+        }
+        .action-button:hover { 
+            filter: brightness(1.2); 
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .action-button.action-button-pending {
+            background-color: var(--bunge-secondary);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .action-button.action-button-pending:hover {
+            transform: none;
+            box-shadow: none;
+            filter: brightness(1.15);
+        }
+
         footer {
-            visibility: hidden; /* Escondido para animar com GSAP */
-            margin-top: 40px; text-align: center; font-size: 0.95rem;
+            visibility: hidden; margin-top: 40px; text-align: center; font-size: 0.95rem;
             color: rgba(255, 255, 255, 0.6);
         }
         .footer-content { display: flex; align-items: center; justify-content: center; gap: 15px; }
         .footer-text span { display: block; }
         .footer-name { font-weight: 700; color: #fff; }
-        .footer-linkedin a { color: var(--text-highlight); font-size: 1.8rem; transition: color 0.3s, transform 0.3s; }
+        
+        .footer-linkedin a { 
+            color: var(--bunge-accent); 
+            font-size: 1.8rem; 
+            transition: color 0.3s, transform 0.3s; 
+        }
         .footer-linkedin a:hover { color: #fff; transform: scale(1.1); }
         
         @media (max-width: 1200px) { .ranking-table-container { padding: 15px; } .ranking-table td, .ranking-table th { font-size: 0.9rem; } }
-        @media (max-width: 768px) { .portal-header h1 { font-size: 1.8rem; } .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) { display: none; } /* Esconde coluna de uso em telas menores */ }
+        @media (max-width: 768px) { .portal-header h1 { font-size: 1.8rem; } .ranking-table th:nth-child(3), .ranking-table td:nth-child(3) { display: none; } }
     </style>
 </head>
 <body>
@@ -95,16 +147,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>1º</td><td><div class="project-name">CARGO FLOW FULL (Dataflow)</div></td><td>26.0%</td><td>De longe o maior consumidor. Sua otimização é crítica.</td><td><a href="diag_cargoflow_introducao.html" class="action-button">Ver Análise</a></td></tr>
-                    <tr><td>2º</td><td><div class="project-name">DSS-B-18-10-CSDataflowBSS-BUGR</div></td><td>9.9%</td><td><span class="observation-critical">Alto consumo e principal causador de sobrecarga.</span></td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>3º</td><td><div class="project-name">RTDSample Vessel Management</div></td><td>6.1%</td><td>Consumo significativo para um único sistema.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>4º</td><td><div class="project-name">Mega Finance Controls Dashboard</div></td><td>5.8%</td><td>Alto consumo para um número moderado de usuários.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>5º</td><td><div class="project-name">Monitoring Eventhouse</div></td><td>4.0%</td><td>Outro sistema de monitoramento com consumo relevante.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>6º</td><td><div class="project-name">Gestão a Vista Snow Versão 2.0</div></td><td>3.8%</td><td>Dataset grande (7.8 GB) com consumo considerável.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>7º</td><td><div class="project-name">RTDSample (BGBVT Integration)</div></td><td>3.6%</td><td>Terceiro item de monitoramento na lista.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>8º</td><td><div class="project-name">O DEVOPS</div></td><td>3.1%</td><td>Consumo relevante para um relatório interno de TI.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>9º</td><td><div class="project-name">Prioritized Improvements</div></td><td>3.1%</td><td>Custo similar ao anterior, dentro do mesmo projeto.</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
-                    <tr><td>10º</td><td><div class="project-name">Prioritized Enhancements</div></td><td>3.0%</td><td>Terceiro item do projeto "Business Technology".</td><td><a href="em_desenvolvimento.html" class="action-button disabled">Analisar</a></td></tr>
+                    <!-- TOP 3 COM DESTAQUE DE ALERTA SUTIL -->
+                    <tr class="top-rank-warning"><td>1º</td><td><div class="project-name">CARGO FLOW FULL (Dataflow)</div></td><td>26.0%</td><td>De longe o maior consumidor. Sua otimização é crítica.</td><td><a href="diag_cargoflow.html" class="action-button">Ver Análise</a></td></tr>
+                    <tr class="top-rank-warning"><td>2º</td><td><div class="project-name">DSS-B-18-10-CSDataflowBSS-BUGR</div></td><td>9.9%</td><td><span class="observation-critical">Alto consumo e principal causador de sobrecarga.</span></td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr class="top-rank-warning"><td>3º</td><td><div class="project-name">RTDSample Vessel Management</div></td><td>6.1%</td><td>Consumo significativo para um único sistema.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    
+                    <!-- DEMAIS ITENS -->
+                    <tr><td>4º</td><td><div class="project-name">Mega Finance Controls Dashboard</div></td><td>5.8%</td><td>Alto consumo para um número moderado de usuários.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>5º</td><td><div class="project-name">Monitoring Eventhouse</div></td><td>4.0%</td><td>Outro sistema de monitoramento com consumo relevante.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>6º</td><td><div class="project-name">Gestão a Vista Snow Versão 2.0</div></td><td>3.8%</td><td>Dataset grande (7.8 GB) com consumo considerável.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>7º</td><td><div class="project-name">RTDSample (BGBVT Integration)</div></td><td>3.6%</td><td>Terceiro item de monitoramento na lista.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>8º</td><td><div class="project-name">O DEVOPS</div></td><td>3.1%</td><td>Consumo relevante para um relatório interno de TI.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>9º</td><td><div class="project-name">Prioritized Improvements</div></td><td>3.1%</td><td>Custo similar ao anterior, dentro do mesmo projeto.</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
+                    <tr><td>10º</td><td><div class="project-name">Prioritized Enhancements</div></td><td>3.0%</td><td>Terceiro item do projeto "Business Technology".</td><td><a href="em_desenvolvimento.html" class="action-button action-button-pending">Em breve</a></td></tr>
                 </tbody>
             </table>
         </div>
@@ -126,8 +181,10 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Animação da Rede Neural
-            (function setupExternalNeuralNetwork(){const t=document.getElementById("external-neural-canvas");if(!t)return;const a=t.getContext("2d");let e,n;function i(){t.width=window.innerWidth,t.height=window.innerHeight,function(){e=[];let n=(t.width*t.height)/15e3;for(let i=0;i<n;i++){let n=2*Math.random()+.5,o=Math.random()*t.width,s=.4*Math.random()-.2,d=.4*Math.random()-.2;e.push(new l(o,Math.random()*t.height,s,d,n,"rgba(100, 255, 218, 0.7)"))}}()}window.addEventListener("resize",i);class l{constructor(t,e,n,i,o,s){this.x=t,this.y=e,this.dirX=n,this.dirY=i,this.size=o,this.color=s}draw(){a.beginPath(),a.arc(this.x,this.y,this.size,0,2*Math.PI,!1),a.fillStyle=this.color,a.fill()}update(){this.x>t.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>t.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const o=()=>{let n=200;for(let i=0;i<e.length;i++)for(let l=i+1;l<e.length;l++){let s=Math.sqrt(Math.pow(e[i].x-e[l].x,2)+Math.pow(e[i].y-e[l].y,2));s<n&&(a.strokeStyle=`rgba(100, 255, 218, ${.5*Math.pow(1-s/n,2)})`,a.lineWidth=.8,a.beginPath(),a.moveTo(e[i].x,e[i].y),a.lineTo(e[l].x,e[l].y),a.stroke())}},s=()=>{n=requestAnimationFrame(s),a.clearRect(0,0,t.width,t.height),e.forEach(t=>{t.update(),t.draw()}),o()};i(),s()})();
+            // Animação da Rede Neural com a cor dourada
+            (function setupExternalNeuralNetwork(){const t=document.getElementById("external-neural-canvas");if(!t)return;const a=t.getContext("2d");let e,n;function i(){t.width=window.innerWidth,t.height=window.innerHeight,function(){e=[];let n=(t.width*t.height)/15e3;for(let i=0;i<n;i++){let n=2*Math.random()+.5,o=Math.random()*t.width,s=.4*Math.random()-.2,d=.4*Math.random()-.2;
+            e.push(new l(o,Math.random()*t.height,s,d,n,"rgba(230, 170, 35, 0.7)"))}}()}window.addEventListener("resize",i);class l{constructor(t,e,n,i,o,s){this.x=t,this.y=e,this.dirX=n,this.dirY=i,this.size=o,this.color=s}draw(){a.beginPath(),a.arc(this.x,this.y,this.size,0,2*Math.PI,!1),a.fillStyle=this.color,a.fill()}update(){this.x>t.width||this.x<0?this.dirX=-this.dirX:void 0,this.y>t.height||this.y<0?this.dirY=-this.dirY:void 0,this.x+=this.dirX,this.y+=this.dirY}}const o=()=>{let n=200;for(let i=0;i<e.length;i++)for(let l=i+1;l<e.length;l++){let s=Math.sqrt(Math.pow(e[i].x-e[l].x,2)+Math.pow(e[i].y-e[l].y,2));s<n&&(
+            a.strokeStyle=`rgba(230, 170, 35, ${.5*Math.pow(1-s/n,2)})`,a.lineWidth=.8,a.beginPath(),a.moveTo(e[i].x,e[i].y),a.lineTo(e[l].x,e[l].y),a.stroke())}},s=()=>{n=requestAnimationFrame(s),a.clearRect(0,0,t.width,t.height),e.forEach(t=>{t.update(),t.draw()}),o()};i(),s()})();
             
             // Animação de entrada com GSAP
             const tl = gsap.timeline({defaults: { ease: "power2.out" }});
