@@ -52,29 +52,37 @@
 
 #critical-alert-banner {
   position: fixed;
-  /* Coloca a tarja abaixo do seu cabeçalho fixo */
-  top: 130px; 
+  /* MUDANÇA 1: Posiciona no meio vertical e horizontal da tela */
+  top: 50%;
   left: 50%;
   
-  /* Animação de entrada e saída */
-  transform: translate(-50%, -20px);
+  /* MUDANÇA 2: Animação de entrada (aparecendo e crescendo) */
+  transform: translate(-50%, -50%) scale(0.9); /* Inicia um pouco menor */
   opacity: 0;
-  transition: all 0.5s ease-in-out;
+  transition: all 0.3s ease-in-out; /* Transição um pouco mais rápida */
   
-  /* Estilo visual */
+  /* MUDANÇA 3: Deixando o balão maior */
+  padding: 20px 40px; /* Mais espaço interno */
+  font-size: 1.2rem;  /* Fonte maior para o texto e ícone */
+  gap: 15px;          /* Mais espaço entre o ícone e o texto */
+  
+  /* Estilos que permanecem os mesmos, com um pequeno ajuste na sombra */
   background-color: var(--status-red);
   color: white;
-  padding: 12px 25px;
   border-radius: 50px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-  z-index: 1050; /* Garante que fique por cima de tudo */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3); /* Sombra mais pronunciada */
+  z-index: 1050; 
   font-weight: 600;
   display: flex;
   align-items: center;
-  gap: 10px;
-  
-  /* Começa "não-clicável" */
   pointer-events: none; 
+}
+
+#critical-alert-banner.visible {
+  /* MUDANÇA 4: Estado final da animação (tamanho normal e visível) */
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Classe que vamos usar no JavaScript para mostrar a tarja */
@@ -224,7 +232,7 @@
         nav ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: nowrap; }
         nav li a { display: block; padding: 15px 20px; text-decoration: none; color: var(--text-light); font-weight: 600; font-size: 14px; border-bottom: 3px solid transparent; transition: all 0.2s ease-in-out; white-space: nowrap; }
         nav li a.active, nav li a:hover { color: var(--bunge-blue); border-bottom-color: var(--bunge-blue); }
-        main { display: none; padding: 25px; animation: fadeIn 0.5s ease; }
+        main { display: none; padding: 25px; animation: fadeIn 0.5s ease;scroll-margin-top: 160px;}
         main.active { display: block; }
         
         .content-card { max-width: 1200px; margin: 0 auto; background-color: var(--card-bg); padding: 30px 40px; border-radius: 8px; border: 1px solid #e0e0e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
@@ -808,16 +816,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // =====================================================================
     //           ESTA É A FUNÇÃO QUE FOI ATUALIZADA
     // =====================================================================
-    function switchTab(targetId) {
-        // Lógica de troca de abas (seu código original)
-        navLinks.forEach(l => l.classList.remove('active'));
-        const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
-        if (activeLink) activeLink.classList.add('active');
+   function switchTab(targetId) {
+    // Lógica de troca de abas (seu código original)
+    navLinks.forEach(l => l.classList.remove('active'));
+    const activeLink = document.querySelector(`.nav-link[data-target="${targetId}"]`);
+    if (activeLink) activeLink.classList.add('active');
 
-        mainContents.forEach(content => content.classList.remove('active'));
-        const activeContent = document.getElementById(targetId);
-        if (activeContent) activeContent.classList.add('active');
+    mainContents.forEach(content => content.classList.remove('active'));
+    const activeContent = document.getElementById(targetId);
+    if (activeContent) activeContent.classList.add('active');
 
+    // ===================================================
+    // ✨ AQUI ESTÁ A CORREÇÃO CIRÚRGICA! ✨
+    // Esta linha garante que a página sempre volte para o topo.
+    window.scrollTo(0, 0);
         // --- LÓGICA DA TARJA DE ALERTA (ADICIONADA AQUI) ---
         const banner = document.getElementById('critical-alert-banner');
         if (banner) {
